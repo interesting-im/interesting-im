@@ -3,6 +3,17 @@ import { routeTree } from "../routeTree.gen"
 import { Link } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
 import { supabaseConfig } from "~/lib/supabase"
+import UserStatsDisplay from "~/components/UserStats"
+
+// Default user stats (for demo)
+const defaultStats = {
+  total_coins: 0,
+  total_experience: 0,
+  level: 1,
+  articles_completed: 0,
+  words_learned: 0,
+  streak_days: 0
+}
 
 // Fetch articles from Supabase
 async function getArticles() {
@@ -47,8 +58,13 @@ export default function ReadingPage() {
         </div>
       </div>
       
+      {/* User Stats */}
+      <div className="max-w-4xl mx-auto px-6 py-6">
+        <UserStatsDisplay stats={defaultStats} />
+      </div>
+      
       {/* Articles Grid */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-4">
         <div className="grid gap-6 md:grid-cols-2">
           {articles.map((article: any) => (
             <Link

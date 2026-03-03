@@ -1,9 +1,20 @@
-import { createAsync } from "@tanstack/react-router"
-import { routeTree } from "../routeTree.gen"
 import { Link } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
-import { supabaseConfig } from "~/lib/supabase"
 import UserStatsDisplay from "~/components/UserStats"
+
+// Static articles for demo
+const defaultArticles = [
+  { id: '1', title: 'The Little Prince - Chapter 1', category: 'Classic', difficulty: 2, reading_time_minutes: 5, excerpt: 'A classic tale about imagination.', author: 'Antoine de Saint-Exupéry' },
+  { id: '2', title: 'The Magic Forest', category: 'Story', difficulty: 1, reading_time_minutes: 3, excerpt: 'A bedtime story about stars and friendship.', author: 'Emma Woods' },
+  { id: '3', title: 'The Solar System', category: 'Science', difficulty: 2, reading_time_minutes: 4, excerpt: 'Learn about our planetary neighborhood.', author: 'Science Kids' },
+  { id: '4', title: 'A Day in the Life', category: 'Life', difficulty: 1, reading_time_minutes: 3, excerpt: 'A simple day described beautifully.', author: 'Lily Green' },
+  { id: '5', title: 'The Ocean Deep', category: 'Nature', difficulty: 2, reading_time_minutes: 4, excerpt: 'Explore the mysterious depths of the sea.', author: 'Ocean Explorer' },
+  { id: '6', title: 'How Plants Grow', category: 'Science', difficulty: 2, reading_time_minutes: 4, excerpt: 'Understanding how plants come to life.', author: 'Garden Teacher' },
+  { id: '7', title: 'The Clever Rabbit', category: 'Fable', difficulty: 1, reading_time_minutes:3, excerpt: 'A classic fable about wit over strength.', author: 'Classic Tales' },
+  { id: '8', title: 'Weather Wonders', category: 'Science', difficulty: 2, reading_time_minutes: 4, excerpt: 'Discover the secrets of weather.', author: 'Weather Watch' },
+  { id: '9', title: 'The Art of Cooking', category: 'Lifestyle', difficulty: 2, reading_time_minutes: 4, excerpt: 'Learn culinary fundamentals.', author: 'Chef Maria' },
+  { id: '10', title: 'A Busy Day at the Office', category: 'Work', difficulty: 1, reading_time_minutes: 4, excerpt: 'A story about teamwork.', author: 'John Smith' },
+]
 
 // Default user stats (for demo)
 const defaultStats = {
@@ -17,21 +28,8 @@ const defaultStats = {
 
 // Fetch articles from Supabase
 async function getArticles() {
-  const { url, anonKey } = supabaseConfig
-  
-  const res = await fetch(`${url}/rest/v1/reading_articles?select=*&order=created_at.desc`, {
-    headers: {
-      apikey: anonKey,
-      Authorization: `Bearer ${anonKey}`
-    }
-  })
-  
-  if (!res.ok) {
-    console.error("Failed to fetch articles:", await res.text())
-    return []
-  }
-  
-  return res.json()
+  // Return static data for now - can connect to Supabase later
+  return defaultArticles
 }
 
 export const Route = createFileRoute("/reading/")({
@@ -43,6 +41,9 @@ export const Route = createFileRoute("/reading/")({
 
 export default function ReadingPage() {
   const { articles } = Route.useLoaderData()
+  
+  // Use static data directly
+  const displayArticles = articles && articles.length > 0 ? articles : defaultArticles
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
@@ -66,7 +67,7 @@ export default function ReadingPage() {
       {/* Articles Grid */}
       <div className="max-w-4xl mx-auto px-6 py-4">
         <div className="grid gap-6 md:grid-cols-2">
-          {articles.map((article: any) => (
+          {displayArticles.map((article: any) => (
             <Link
               key={article.id}
               to={`/reading/$articleId`}

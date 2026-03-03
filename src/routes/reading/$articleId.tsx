@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Link } from "@tanstack/react-router"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { supabaseConfig } from "~/lib/supabase"
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, BookOpen } from "lucide-react"
 
 interface Article {
   id: string
@@ -31,6 +32,10 @@ function ArticlePage() {
   const [vocabulary, setVocabulary] = useState<Vocabulary[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Page navigation state
+  const [currentPage, setCurrentPage] = useState(0)
+  const [selectedWordIndex, setSelectedWordIndex] = useState(-1)
 
   useEffect(() => {
     async function fetchArticle() {
@@ -85,186 +90,330 @@ function ArticlePage() {
     fetchArticle()
   }, [articleId])
 
-  // Client-side word tap interaction
-  useEffect(() => {
-    const handleWordClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (target.dataset.word) {
-        const tooltip = document.getElementById('word-tooltip')
-        const wordEl = document.getElementById('tooltip-word')
-        const transEl = document.getElementById('tooltip-translation')
-        const pronEl = document.getElementById('tooltip-pronunciation')
-        const exampleEl = document.getElementById('tooltip-example')
+  // Split content into pages (paragraphs)
+  const pages = useMemo(() => {
+    if (!article?.content) return []
+    return article.content.split('\n\n').filter(p => p.trim())
+  }, [article?.content])
 
-        if (tooltip && wordEl && transEl) {
-          wordEl.textContent = target.dataset.word || ''
-          transEl.textContent = target.dataset.translation || ''
-          pronEl.textContent = target.dataset.pronunciation || ''
-          exampleEl.textContent = target.dataset.example || ''
+  // Get vocabulary for current page
+  const currentPageVocab = useMemo(() => {
+    if (!vocabulary.length || !pages[currentPage]) return []
+    const pageText = pages[currentPage].toLowerCase()
+    return vocabulary.filter(v => pageText.includes(v.word.toLowerCase()))
+  }, [vocabulary, pages, currentPage])
 
-          tooltip.style.display = 'block'
-          tooltip.style.left = `${Math.min(e.clientX + 10, window.innerWidth - 250)}px`
-          tooltip.style.top = `${Math.min(e.clientY + 10, window.innerHeight - 150)}px`
-
-          // Hide on click elsewhere
-          const hideTooltip = (evt: MouseEvent) => {
-            if (evt.target !== target) {
-              tooltip.style.display = 'none'
-              document.removeEventListener('click', hideTooltip)
-            }
-          }
-          setTimeout(() => document.addEventListener('click', hideTooltip), 100)
-        }
-      }
+  // Navigation handlers
+  const goToNextPage = () => {
+    if (currentPage < pages.length - 1) {
+      setCurrentPage(currentPage + 1)
+      setSelectedWordIndex(-1)
     }
-
-    document.addEventListener('click', handleWordClick)
-    return () => document.removeEventListener('click', handleWordClick)
-  }, [])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    )
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-red-400">{error}</div>
-      </div>
-    )
-  }
-
-  if (!article) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white">Article not found</div>
-      </div>
-    )
-  }
-
-  // Process content - wrap vocabulary words
-  const processContent = (content: string) => {
-    if (!vocabulary || vocabulary.length === 0) {
-      return content
+  const goToPrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1)
+      setSelectedWordIndex(-1)
     }
+  }
 
-    // Sort words by length (longest first) to avoid partial matches
-    const words = vocabulary
-      .map((v) => v.word)
-      .sort((a: string, b: string) => b.length - a.length)
-
-    // Create regex pattern
-    const pattern = new RegExp(`\\b(${words.join('|')})\\b`, 'gi')
-
-    return content.split(pattern).map((part, i) => {
-      const matchedWord = vocabulary.find(
-        (v) => v.word.toLowerCase() === part.toLowerCase()
-      )
-
-      if (matchedWord) {
+  // Highlight word in text
+  const highlightText = (text: string, wordToHighlight: string) => {
+    if (!wordToHighlight) return text
+    
+    const regex = new RegExp(`(\\b${wordToHighlight}\\b)`, 'gi')
+    const parts = text.split(regex)
+    
+    return parts.map((part, i) => {
+      if (part.toLowerCase() === wordToHighlight.toLowerCase()) {
         return (
-          <span
-            key={i}
-            className="cursor-pointer text-yellow-400 hover:text-yellow-300 hover:underline font-medium"
-            data-word={matchedWord.word}
-            data-translation={matchedWord.translation}
-            data-pronunciation={matchedWord.pronunciation || ''}
-            data-example={matchedWord.example_sentence || ''}
+          <mark 
+            key={i} 
+            className="bg-amber-200 dark:bg-amber-700/50 text-amber-900 dark:text-amber-100 px-0.5 rounded"
           >
             {part}
-          </span>
+          </mark>
         )
       }
       return part
     })
   }
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-amber-50 dark:bg-zinc-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4 animate-pulse">📖</div>
+          <p className="text-amber-700 dark:text-amber-300">Loading story...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-amber-50 dark:bg-zinc-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">❌</div>
+          <p className="text-red-600 dark:text-red-400">{error}</p>
+          <Link to="/reading" className="text-amber-600 dark:text-amber-400 hover:underline mt-4 block">
+            ← Back to Bookshelf
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (!article) {
+    return (
+      <div className="min-h-screen bg-amber-50 dark:bg-zinc-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-4xl mb-4">📚</div>
+          <p className="text-amber-700 dark:text-amber-300">Story not found</p>
+          <Link to="/reading" className="text-amber-600 dark:text-amber-400 hover:underline mt-4 block">
+            ← Back to Bookshelf
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  const selectedWord = selectedWordIndex >= 0 ? currentPageVocab[selectedWordIndex] : null
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+    <div className="min-h-screen bg-amber-50 dark:bg-zinc-900 flex flex-col">
       {/* Header */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700 sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-6 py-4">
+      <header className="bg-amber-100/80 dark:bg-zinc-800/80 backdrop-blur-sm border-b border-amber-200 dark:border-zinc-700 sticky top-0 z-20">
+        <div className="max-w-4xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <Link to="/reading" className="text-slate-400 hover:text-white transition-colors flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Reading
+            <Link 
+              to="/reading" 
+              className="flex items-center gap-2 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5" />
+              <span className="text-sm font-medium">Bookshelf</span>
             </Link>
-            <div className="flex items-center gap-4">
-              <span className="text-slate-400 text-sm">
-                {vocabulary?.length || 0} vocabulary words
+            
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-amber-600 dark:text-amber-400 bg-amber-200/50 dark:bg-zinc-700 px-2 py-0.5 rounded">
+                {currentPage + 1} / {pages.length}
               </span>
+              <span className="text-amber-500 dark:text-zinc-400 hidden sm:block">
+                {currentPageVocab.length} words
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Title */}
+      <div className="bg-amber-100/50 dark:bg-zinc-800/50 border-b border-amber-200/50 dark:border-zinc-700/50">
+        <div className="max-w-4xl mx-auto px-6 py-6 text-center">
+          <h1 
+            className="text-2xl md:text-3xl font-bold text-amber-900 dark:text-amber-100"
+            style={{ fontFamily: "Georgia, serif" }}
+          >
+            {article.title}
+          </h1>
+          <div className="flex items-center justify-center gap-3 mt-2 text-sm text-amber-600 dark:text-amber-400">
+            <span>{article.author || "Unknown"}</span>
+            <span>•</span>
+            <span>{article.reading_time_minutes || 5} min read</span>
+            <span>•</span>
+            <span className="px-2 py-0.5 bg-amber-200 dark:bg-zinc-700 rounded-full text-xs">
+              {article.category || "General"}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex max-w-6xl mx-auto w-full">
+        {/* Left sidebar - Vocabulary buttons (desktop) */}
+        <div className="hidden lg:flex flex-col w-48 xl:w-56 p-4 border-r border-amber-200/50 dark:border-zinc-700/50">
+          <div className="sticky top-24">
+            <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-3 flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Vocabulary
+            </h3>
+            <div className="space-y-2">
+              {currentPageVocab.length > 0 ? (
+                currentPageVocab.map((v, index) => (
+                  <button
+                    key={v.id}
+                    onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                      selectedWordIndex === index
+                        ? "bg-amber-200 dark:bg-amber-700 text-amber-900 dark:text-amber-100 font-medium shadow-sm"
+                        : "bg-amber-100 dark:bg-zinc-800 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-zinc-700"
+                    }`}
+                  >
+                    {v.word}
+                  </button>
+                ))
+              ) : (
+                <p className="text-amber-500/50 dark:text-zinc-500 text-sm text-center py-4">
+                  No vocabulary on this page
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Content area */}
+        <div className="flex-1 flex flex-col">
+          {/* Reading content */}
+          <div className="flex-1 p-6 md:p-8 lg:p-12">
+            <div 
+              className="max-w-2xl mx-auto text-lg md:text-xl leading-relaxed md:leading-loose text-amber-800 dark:text-zinc-200"
+              style={{ fontFamily: "Georgia, serif" }}
+            >
+              {selectedWord ? (
+                <p>{highlightText(pages[currentPage], selectedWord.word)}</p>
+              ) : (
+                <p>{pages[currentPage]}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Definition bar */}
+          <div className="bg-amber-100 dark:bg-zinc-800 border-t border-amber-200 dark:border-zinc-700">
+            <div className="max-w-2xl mx-auto px-6 py-4 min-h-[60px] flex items-center">
+              {selectedWord ? (
+                <div className="w-full">
+                  <div className="flex items-center gap-3 mb-1">
+                    <span className="text-lg font-semibold text-amber-900 dark:text-amber-100">
+                      {selectedWord.word}
+                    </span>
+                    {selectedWord.pronunciation && (
+                      <span className="text-sm text-amber-600 dark:text-amber-400">
+                        {selectedWord.pronunciation}
+                      </span>
+                    )}
+                    {selectedWord.part_of_speech && (
+                      <span className="text-xs px-2 py-0.5 bg-amber-200 dark:bg-zinc-700 rounded text-amber-700 dark:text-amber-300">
+                        {selectedWord.part_of_speech}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-amber-800 dark:text-amber-200 font-medium">
+                    {selectedWord.translation}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-amber-500 dark:text-zinc-500 text-sm text-center w-full">
+                  {currentPageVocab.length > 0 
+                    ? "👆 Click a vocabulary word to see its meaning" 
+                    : "No vocabulary words on this page"}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile vocabulary buttons */}
+          {currentPageVocab.length > 0 && (
+            <div className="lg:hidden bg-amber-50 dark:bg-zinc-850 border-t border-amber-200/50 dark:border-zinc-700/50 p-3">
+              <div className="flex flex-wrap gap-2 justify-center">
+                {currentPageVocab.map((v, index) => (
+                  <button
+                    key={v.id}
+                    onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
+                    className={`px-3 py-1.5 rounded-full text-sm transition-all ${
+                      selectedWordIndex === index
+                        ? "bg-amber-300 dark:bg-amber-600 text-amber-900 dark:text-amber-100 font-medium"
+                        : "bg-amber-100 dark:bg-zinc-800 text-amber-700 dark:text-amber-300"
+                    }`}
+                  >
+                    {v.word}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Navigation bar */}
+          <div className="bg-amber-100/80 dark:bg-zinc-800/80 border-t border-amber-200 dark:border-zinc-700">
+            <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
+              <button
+                onClick={goToPrevPage}
+                disabled={currentPage === 0}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                  currentPage === 0
+                    ? "text-amber-300 dark:text-zinc-600 cursor-not-allowed"
+                    : "text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-zinc-700"
+                }`}
+              >
+                <ChevronLeft className="w-5 h-5" />
+                <span className="text-sm font-medium hidden sm:block">Previous</span>
+              </button>
+
+              {/* Page dots */}
+              <div className="flex items-center gap-1">
+                {pages.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setCurrentPage(i)
+                      setSelectedWordIndex(-1)
+                    }}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      i === currentPage
+                        ? "bg-amber-500 dark:bg-amber-400 w-4"
+                        : "bg-amber-300 dark:bg-zinc-600 hover:bg-amber-400 dark:hover:bg-zinc-500"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === pages.length - 1}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                  currentPage === pages.length - 1
+                    ? "text-amber-300 dark:text-zinc-600 cursor-not-allowed"
+                    : "text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-zinc-700"
+                }`}
+              >
+                <span className="text-sm font-medium hidden sm:block">Next</span>
+                <ChevronRight className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Article Content */}
-      <div className="max-w-3xl mx-auto px-6 py-8">
-        {/* Title */}
-        <h1 className="text-3xl font-bold text-white mb-4">{article.title}</h1>
-
-        {/* Meta */}
-        <div className="flex items-center gap-4 mb-8 text-slate-400">
-          <span>{article.author || "Unknown"}</span>
-          <span>•</span>
-          <span>{article.reading_time_minutes || 5} min read</span>
-          <span>•</span>
-          <span className="px-2 py-0.5 bg-slate-700 rounded-full text-xs">
-            {article.category || "General"}
-          </span>
-        </div>
-
-        {/* Content */}
-        <div className="prose prose-lg prose-invert max-w-none">
-          {article.content.split('\n\n').map((paragraph: string, i: number) => (
-            <p key={i} className="text-slate-200 leading-relaxed mb-6">
-              {processContent(paragraph)}
-            </p>
-          ))}
-        </div>
-
-        {/* Vocabulary Panel */}
-        {vocabulary && vocabulary.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-slate-700">
-            <h2 className="text-xl font-semibold text-white mb-4">📚 Vocabulary</h2>
-            <div className="grid gap-3 md:grid-cols-2">
+      {/* Vocabulary Panel - Full list at bottom */}
+      {vocabulary.length > 0 && (
+        <div className="bg-amber-100/50 dark:bg-zinc-800/50 border-t border-amber-200 dark:border-zinc-700">
+          <div className="max-w-4xl mx-auto px-6 py-8">
+            <h2 className="text-lg font-semibold text-amber-800 dark:text-amber-200 mb-4 flex items-center gap-2">
+              📚 All Vocabulary ({vocabulary.length} words)
+            </h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {vocabulary.map((v) => (
-                <div key={v.id} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                <div 
+                  key={v.id} 
+                  className="bg-white dark:bg-zinc-800 rounded-lg p-3 border border-amber-100 dark:border-zinc-700"
+                >
                   <div className="flex items-start justify-between mb-1">
-                    <span className="text-white font-medium">{v.word}</span>
-                    <span className="text-slate-500 text-sm">{v.pronunciation}</span>
+                    <span className="font-medium text-amber-900 dark:text-amber-100">{v.word}</span>
+                    {v.pronunciation && (
+                      <span className="text-xs text-amber-500 dark:text-zinc-500">{v.pronunciation}</span>
+                    )}
                   </div>
-                  <div className="text-yellow-400 text-sm mb-1">{v.translation}</div>
-                  <div className="text-slate-400 text-xs">{v.part_of_speech}</div>
-                  {v.example_sentence && (
-                    <div className="mt-2 text-slate-500 text-xs italic">
-                      "{v.example_sentence}"
-                    </div>
+                  <p className="text-amber-600 dark:text-amber-300 text-sm">{v.translation}</p>
+                  {v.part_of_speech && (
+                    <span className="text-xs text-amber-500 dark:text-zinc-500 mt-1 block">
+                      {v.part_of_speech}
+                    </span>
                   )}
                 </div>
               ))}
             </div>
           </div>
-        )}
-      </div>
-
-      {/* Word Tooltip (hidden by default, shown on click) */}
-      <div
-        id="word-tooltip"
-        className="fixed hidden bg-slate-800 border border-slate-600 rounded-lg p-4 shadow-xl z-50 max-w-xs"
-        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-      >
-        <div className="text-white font-medium mb-1" id="tooltip-word"></div>
-        <div className="text-yellow-400 text-sm mb-1" id="tooltip-translation"></div>
-        <div className="text-slate-400 text-xs" id="tooltip-pronunciation"></div>
-        <div className="text-slate-500 text-xs mt-2 italic" id="tooltip-example"></div>
-      </div>
+        </div>
+      )}
     </div>
   )
 }

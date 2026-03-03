@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
-import UserStatsDisplay from "~/components/UserStats"
 import { supabaseConfig } from "~/lib/supabase"
 
 // Article type definition
@@ -38,7 +37,7 @@ function ReadingPage() {
   useEffect(() => {
     async function fetchArticles() {
       const { url, anonKey } = supabaseConfig
-      
+
       try {
         const res = await fetch(
           `${url}/rest/v1/reading_articles?is_published=eq.true&select=id,title,excerpt,author,category,difficulty,reading_time_minutes,word_count&order=created_at.desc`,
@@ -49,11 +48,11 @@ function ReadingPage() {
             }
           }
         )
-        
+
         if (!res.ok) {
           throw new Error(`Failed to fetch: ${res.status}`)
         }
-        
+
         const data = await res.json()
         setArticles(data)
       } catch (err) {
@@ -67,75 +66,133 @@ function ReadingPage() {
     fetchArticles()
   }, [])
 
+  // Generate a deterministic color based on article id for variety
+  const getBookColor = (id: string) => {
+    const colors = [
+      "from-amber-600 to-amber-800",
+      "from-stone-600 to-stone-800",
+      "from-emerald-700 to-emerald-900",
+      "from-blue-700 to-blue-900",
+      "from-rose-700 to-rose-900",
+      "from-violet-700 to-violet-900",
+    ]
+    const index = id.charCodeAt(0) % colors.length
+    return colors[index]
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
+    <div className="min-h-screen bg-amber-50 dark:bg-zinc-900">
       {/* Header */}
-      <div className="bg-slate-800/50 backdrop-blur-sm border-b border-slate-700">
-        <div className="max-w-4xl mx-auto px-6 py-4">
+      <div className="bg-amber-100/80 dark:bg-zinc-800/80 backdrop-blur-sm border-b border-amber-200 dark:border-zinc-700">
+        <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-white">📖 Reading</h1>
-            <Link to="/" className="text-slate-400 hover:text-white transition-colors">
-              ← Back
+            <div>
+              <h1 className="text-3xl font-bold text-amber-900 dark:text-amber-100 tracking-tight" style={{ fontFamily: "Georgia, serif" }}>
+                📚 Bookshelf
+              </h1>
+              <p className="text-amber-700 dark:text-amber-300 mt-1 text-sm">
+                Pick a story to start reading
+              </p>
+            </div>
+            <Link 
+              to="/" 
+              className="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 transition-colors text-sm"
+            >
+              ← Back to Home
             </Link>
           </div>
         </div>
       </div>
-      
+
       {/* User Stats */}
-      <div className="max-w-4xl mx-auto px-6 py-6">
-        <UserStatsDisplay stats={defaultStats} />
+      <div className="max-w-6xl mx-auto px-6 py-4">
+        <div className="flex gap-4 text-sm">
+          <div className="bg-amber-100 dark:bg-zinc-800 px-4 py-2 rounded-lg border border-amber-200 dark:border-zinc-700">
+            <span className="text-amber-600 dark:text-amber-400">🪙</span>
+            <span className="ml-1 text-amber-900 dark:text-amber-100 font-medium">{defaultStats.total_coins}</span>
+          </div>
+          <div className="bg-amber-100 dark:bg-zinc-800 px-4 py-2 rounded-lg border border-amber-200 dark:border-zinc-700">
+            <span className="text-amber-600 dark:text-amber-400">⭐</span>
+            <span className="ml-1 text-amber-900 dark:text-amber-100 font-medium">Level {defaultStats.level}</span>
+          </div>
+          <div className="bg-amber-100 dark:bg-zinc-800 px-4 py-2 rounded-lg border border-amber-200 dark:border-zinc-700">
+            <span className="text-amber-600 dark:text-amber-400">📖</span>
+            <span className="ml-1 text-amber-900 dark:text-amber-100 font-medium">{defaultStats.articles_completed} read</span>
+          </div>
+        </div>
       </div>
-      
-      {/* Articles Grid */}
-      <div className="max-w-4xl mx-auto px-6 py-4">
+
+      {/* Books Grid */}
+      <div className="max-w-6xl mx-auto px-6 py-6">
         {loading ? (
           <div className="text-center py-20">
-            <div className="text-4xl mb-4">⏳</div>
-            <p className="text-slate-400">Loading articles...</p>
+            <div className="text-4xl mb-4">📚</div>
+            <p className="text-amber-700 dark:text-amber-300">Loading books...</p>
           </div>
         ) : error ? (
           <div className="text-center py-20">
             <div className="text-4xl mb-4">❌</div>
-            <p className="text-red-400">{error}</p>
+            <p className="text-red-600 dark:text-red-400">{error}</p>
           </div>
         ) : articles.length > 0 ? (
-          <div className="grid gap-6 md:grid-cols-2">
-            {articles.map((article) => (
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {articles.map((article, index) => (
               <Link
                 key={article.id}
                 to="/reading/$articleId"
                 params={{ articleId: article.id }}
-                className="group bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700 hover:border-slate-500 transition-all hover:shadow-xl hover:shadow-slate-900/50"
+                className="group flex flex-col bg-white dark:bg-zinc-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-amber-100 dark:border-zinc-700 hover:border-amber-300 dark:hover:border-zinc-600"
               >
-                {/* Cover Image or Placeholder */}
-                <div className="h-40 bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-                  <span className="text-4xl">📚</span>
+                {/* Book Cover */}
+                <div 
+                  className={`h-48 bg-gradient-to-br ${getBookColor(article.id)} flex items-center justify-center relative overflow-hidden`}
+                >
+                  {/* Book spine effect */}
+                  <div className="absolute left-0 top-0 bottom-0 w-4 bg-black/10" />
+                  
+                  {/* Book content preview */}
+                  <div className="text-center px-6 relative z-10">
+                    <div className="text-4xl mb-2 opacity-80">
+                      {article.category === 'Classic' ? '👑' : 
+                       article.category === 'Science' ? '🔬' :
+                       article.category === 'Story' ? '✨' :
+                       article.category === 'Work' ? '💼' :
+                       article.category === 'Lifestyle' ? '🍳' :
+                       article.category === 'Nature' ? '🌿' : '📖'}
+                    </div>
+                    <div 
+                      className="text-white text-lg font-semibold leading-tight line-clamp-2"
+                      style={{ fontFamily: "Georgia, serif" }}
+                    >
+                      {article.title}
+                    </div>
+                  </div>
+
+                  {/* Page edges effect */}
+                  <div className="absolute right-2 top-4 bottom-4 w-1 bg-white/20 rounded" />
+                  <div className="absolute right-4 top-4 bottom-4 w-0.5 bg-white/10 rounded" />
                 </div>
-                
-                {/* Content */}
-                <div className="p-5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-0.5 bg-slate-700 text-slate-300 text-xs rounded-full">
+
+                {/* Book Info */}
+                <div className="p-5 flex-1 flex flex-col">
+                  <div className="flex items-center gap-2 mb-2 text-xs">
+                    <span className="px-2 py-0.5 bg-amber-100 dark:bg-zinc-700 text-amber-700 dark:text-amber-300 rounded-full">
                       {article.category || "General"}
                     </span>
-                    <span className="text-slate-500 text-xs">
+                    <span className="text-amber-500 dark:text-amber-400">
                       ⭐ {article.difficulty || 1}
                     </span>
-                    <span className="text-slate-500 text-xs">
-                      ⏱️ {article.reading_time_minutes || 5} min
+                    <span className="text-amber-500 dark:text-amber-400">
+                      ⏱ {article.reading_time_minutes || 5} min
                     </span>
                   </div>
-                  
-                  <h2 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors mb-2">
-                    {article.title}
-                  </h2>
-                  
-                  <p className="text-slate-400 text-sm line-clamp-2">
+
+                  <p className="text-amber-700 dark:text-zinc-300 text-sm line-clamp-2 flex-1 mb-3">
                     {article.excerpt || "No description available."}
                   </p>
-                  
-                  <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
-                    <span>{article.author || "Unknown"}</span>
+
+                  <div className="flex items-center justify-between text-xs text-amber-500 dark:text-zinc-500 pt-3 border-t border-amber-100 dark:border-zinc-700">
+                    <span className="font-medium">{article.author || "Unknown"}</span>
                     <span>{article.word_count || 0} words</span>
                   </div>
                 </div>
@@ -145,12 +202,19 @@ function ReadingPage() {
         ) : (
           <div className="text-center py-20">
             <div className="text-6xl mb-4">📖</div>
-            <p className="text-slate-400">No articles yet</p>
-            <p className="text-slate-500 text-sm mt-2">
-              Make sure you have published articles in Supabase with is_published = true
+            <p className="text-amber-700 dark:text-amber-300 text-lg">No books on the shelf yet</p>
+            <p className="text-amber-500 dark:text-zinc-500 text-sm mt-2">
+              Check back soon for new stories!
             </p>
           </div>
         )}
+      </div>
+
+      {/* Footer */}
+      <div className="max-w-6xl mx-auto px-6 py-8 text-center">
+        <p className="text-amber-500 dark:text-zinc-500 text-sm">
+          {articles.length} books available
+        </p>
       </div>
     </div>
   )

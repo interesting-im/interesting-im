@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Badge } from '~/components/ui/badge'
@@ -23,7 +24,9 @@ function HomeComponent() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-3">
-            <Button>Get Started</Button>
+            <Link to="/reading">
+              <Button>Start Reading</Button>
+            </Link>
             <Button variant="outline">Learn More</Button>
           </div>
         </CardContent>
@@ -31,16 +34,18 @@ function HomeComponent() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { title: '📚 Reading', desc: 'Interactive articles with audio' },
-          { title: '🎯 Vocabulary', desc: 'Tap words for translations' },
-          { title: '🏆 Rewards', desc: 'Earn coins while learning' },
+          { title: '📚 Reading', desc: 'Interactive articles with audio', link: '/reading' },
+          { title: '🎯 Vocabulary', desc: 'Tap words for translations', link: '/reading' },
+          { title: '🏆 Rewards', desc: 'Earn coins while learning', link: '/reading' },
         ].map((feature) => (
-          <Card key={feature.title} className="border-slate-200">
-            <CardHeader>
-              <CardTitle className="text-lg">{feature.title}</CardTitle>
-              <CardDescription>{feature.desc}</CardDescription>
-            </CardHeader>
-          </Card>
+          <Link key={feature.title} to={feature.link}>
+            <Card className="border-slate-200 hover:border-slate-400 transition-colors cursor-pointer">
+              <CardHeader>
+                <CardTitle className="text-lg">{feature.title}</CardTitle>
+                <CardDescription>{feature.desc}</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
         ))}
       </div>
     </div>

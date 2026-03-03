@@ -1,61 +1,90 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Link } from "@tanstack/react-router"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { supabaseConfig } from "~/lib/supabase"
 
-// Fetch single article with vocabulary
-async function getArticle(articleId: string) {
-  const { url, anonKey } = supabaseConfig
-  
-  // Get article
-  const articleRes = await fetch(
-    `${url}/rest/v1/reading_articles?id=eq.${articleId}&select=*`,
-    {
-      headers: {
-        apikey: anonKey,
-        Authorization: `Bearer ${anonKey}`
-      }
-    }
-  )
-  
-  if (!articleRes.ok) {
-    console.error("Failed to fetch article:", await articleRes.text())
-    return null
-  }
-  
-  const articles = await articleRes.json()
-  if (!articles || articles.length === 0) {
-    return null
-  }
-  
-  const article = articles[0]
-  
-  // Get vocabulary for this article
-  const vocabRes = await fetch(
-    `${url}/rest/v1/reading_vocabulary?article_id=eq.${articleId}&select=*`,
-    {
-      headers: {
-        apikey: anonKey,
-        Authorization: `Bearer ${anonKey}`
-      }
-    }
-  )
-  
-  const vocabulary = vocabRes.ok ? await vocabRes.json() : []
-  
-  return { article, vocabulary }
+interface Article {
+  id: string
+  title: string
+  content: string
+  author: string | null
+  category: string | null
+  reading_time_minutes: number | null
+}
+
+interface Vocabulary {
+  id: string
+  word: string
+  translation: string
+  pronunciation: string | null
+  part_of_speech: string | null
+  example_sentence: string | null
 }
 
 export const Route = createFileRoute("/reading/$articleId")({
-  loader: async ({ params }) => {
-    const data = await getArticle(params.articleId)
-    return { data }
-  },
+  component: ArticlePage,
 })
 
-export default function ArticlePage() {
-  const { data } = Route.useLoaderData()
-  
+function ArticlePage() {
+  const { articleId } = Route.useParams()
+  const [article, setArticle] = useState<Article | null>(null)
+  const [vocabulary, setVocabulary] = useState<Vocabulary[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function fetchArticle() {
+      const { url, anonKey } = supabaseConfig
+
+      try {
+        // Get article
+        const articleRes = await fetch(
+          `${url}/rest/v1/reading_articles?id=eq.${articleId}&select=*`,
+          {
+            headers: {
+              apikey: anonKey,
+              Authorization: `Bearer ${anonKey}`
+            }
+          }
+        )
+
+        if (!articleRes.ok) {
+          throw new Error(`Failed to fetch article: ${articleRes.status}`)
+        }
+
+        const articles = await articleRes.json()
+        if (!articles || articles.length === 0) {
+          setArticle(null)
+          return
+        }
+
+        setArticle(articles[0])
+
+        // Get vocabulary for this article
+        const vocabRes = await fetch(
+          `${url}/rest/v1/reading_vocabulary?article_id=eq.${articleId}&select=*`,
+          {
+            headers: {
+              apikey: anonKey,
+              Authorization: `Bearer ${anonKey}`
+            }
+          }
+        )
+
+        if (vocabRes.ok) {
+          setVocabulary(await vocabRes.json())
+        }
+      } catch (err) {
+        console.error("Error fetching article:", err)
+        setError(err instanceof Error ? err.message : "Failed to load article")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchArticle()
+  }, [articleId])
+
   // Client-side word tap interaction
   useEffect(() => {
     const handleWordClick = (e: MouseEvent) => {
@@ -66,17 +95,17 @@ export default function ArticlePage() {
         const transEl = document.getElementById('tooltip-translation')
         const pronEl = document.getElementById('tooltip-pronunciation')
         const exampleEl = document.getElementById('tooltip-example')
-        
+
         if (tooltip && wordEl && transEl) {
           wordEl.textContent = target.dataset.word || ''
           transEl.textContent = target.dataset.translation || ''
           pronEl.textContent = target.dataset.pronunciation || ''
           exampleEl.textContent = target.dataset.example || ''
-          
+
           tooltip.style.display = 'block'
           tooltip.style.left = `${Math.min(e.clientX + 10, window.innerWidth - 250)}px`
           tooltip.style.top = `${Math.min(e.clientY + 10, window.innerHeight - 150)}px`
-          
+
           // Hide on click elsewhere
           const hideTooltip = (evt: MouseEvent) => {
             if (evt.target !== target) {
@@ -88,46 +117,54 @@ export default function ArticlePage() {
         }
       }
     }
-    
+
     document.addEventListener('click', handleWordClick)
     return () => document.removeEventListener('click', handleWordClick)
   }, [])
-  
-  if (!data?.article) {
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-red-400">{error}</div>
+      </div>
+    )
+  }
+
+  if (!article) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="text-white">Article not found</div>
       </div>
     )
   }
-  
-  const { article, vocabulary } = data
-  
-  // Create vocabulary map for quick lookup
-  const vocabMap = new Map()
-  vocabulary?.forEach((v: any) => {
-    vocabMap.set(v.word.toLowerCase(), v)
-  })
-  
+
   // Process content - wrap vocabulary words
   const processContent = (content: string) => {
     if (!vocabulary || vocabulary.length === 0) {
       return content
     }
-    
+
     // Sort words by length (longest first) to avoid partial matches
     const words = vocabulary
-      .map((v: any) => v.word)
+      .map((v) => v.word)
       .sort((a: string, b: string) => b.length - a.length)
-    
+
     // Create regex pattern
     const pattern = new RegExp(`\\b(${words.join('|')})\\b`, 'gi')
-    
+
     return content.split(pattern).map((part, i) => {
       const matchedWord = vocabulary.find(
-        (v: any) => v.word.toLowerCase() === part.toLowerCase()
+        (v) => v.word.toLowerCase() === part.toLowerCase()
       )
-      
+
       if (matchedWord) {
         return (
           <span
@@ -145,7 +182,7 @@ export default function ArticlePage() {
       return part
     })
   }
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
       {/* Header */}
@@ -166,12 +203,12 @@ export default function ArticlePage() {
           </div>
         </div>
       </div>
-      
+
       {/* Article Content */}
       <div className="max-w-3xl mx-auto px-6 py-8">
         {/* Title */}
         <h1 className="text-3xl font-bold text-white mb-4">{article.title}</h1>
-        
+
         {/* Meta */}
         <div className="flex items-center gap-4 mb-8 text-slate-400">
           <span>{article.author || "Unknown"}</span>
@@ -182,7 +219,7 @@ export default function ArticlePage() {
             {article.category || "General"}
           </span>
         </div>
-        
+
         {/* Content */}
         <div className="prose prose-lg prose-invert max-w-none">
           {article.content.split('\n\n').map((paragraph: string, i: number) => (
@@ -191,13 +228,13 @@ export default function ArticlePage() {
             </p>
           ))}
         </div>
-        
+
         {/* Vocabulary Panel */}
         {vocabulary && vocabulary.length > 0 && (
           <div className="mt-12 pt-8 border-t border-slate-700">
             <h2 className="text-xl font-semibold text-white mb-4">📚 Vocabulary</h2>
             <div className="grid gap-3 md:grid-cols-2">
-              {vocabulary.map((v: any) => (
+              {vocabulary.map((v) => (
                 <div key={v.id} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
                   <div className="flex items-start justify-between mb-1">
                     <span className="text-white font-medium">{v.word}</span>
@@ -216,9 +253,9 @@ export default function ArticlePage() {
           </div>
         )}
       </div>
-      
+
       {/* Word Tooltip (hidden by default, shown on click) */}
-      <div 
+      <div
         id="word-tooltip"
         className="fixed hidden bg-slate-800 border border-slate-600 rounded-lg p-4 shadow-xl z-50 max-w-xs"
         style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}

@@ -343,9 +343,9 @@ function ArticlePage() {
           </div>
         </div>
 
-        {/* Right Sidebar - Vocabulary */}
+        {/* Right Sidebar - Vocabulary - only on medium screens, hidden on xl+ */}
         {currentPage > 0 && (
-          <div className="hidden lg:flex flex-col w-44 xl:w-52 bg-neutral-800/20 p-4 border-l border-neutral-700">
+          <div className="hidden lg:flex xl:hidden flex-col w-40 bg-neutral-800/20 p-3 border-l border-neutral-700">
             <div className="sticky top-24">
               <h3 className="text-sm font-semibold text-neutral-400 mb-3 flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />

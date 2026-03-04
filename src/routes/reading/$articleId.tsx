@@ -205,13 +205,6 @@ function ArticlePage() {
     "hidden md:basis-1/8"
   )
 
-  const rightSidebarClasses = clsx(
-    currentPage === 0
-      ? "bg-amber-100/10 dark:bg-zinc-800/10"
-      : "bg-amber-100/30 dark:bg-zinc-800/30",
-    "hidden lg:flex lg:basis-1/3 xl:basis-1/4 2xl:basis-1/6 justify-center items-center"
-  )
-
   return (
     <div className="ml-4 mr-4 flex justify-center min-h-screen">
       <div className="basis lg:basis-2/3 xl:basis-3/4 2xl:basis-5/6 flex flex-col">
@@ -440,58 +433,6 @@ function ArticlePage() {
             >
               <ChevronRight color={currentPage >= contentPages ? "#9ca3af" : "black"} size={24} strokeWidth={1.5} />
             </button>
-          </div>
-        )}
-      </div>
-
-      {/* Right Sidebar - Vocabulary */}
-      <div className={rightSidebarClasses}>
-        {currentPage === 0 ? (
-          // Vocabulary list on cover page
-          <div className="flex flex-col w-full h-full justify-start items-center text-stone-600 dark:text-stone-300/50">
-            <h1 className="md:pt-16 md:text-4xl lg:text-5xl" style={{ fontFamily: "Barlow Condensed, sans-serif" }}>
-              Vocabulary
-            </h1>
-            <div className="flex flex-col h-full mt-8 justify-center items-start">
-              {vocabulary.map((v, index) => (
-                <div key={index} className="flex">
-                  <input type="checkbox" className="mr-2" />
-                  <p className="ml-2 leading-8 capitalize hover:text-amber-800 dark:hover:text-amber-200">
-                    {v.word}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          // Gallery or empty on content pages
-          <div className="flex items-center justify-center w-full h-full text-stone-500 dark:text-stone-400">
-            {currentPageVocab.length > 0 ? (
-              <div className="space-y-2 w-full px-4">
-                <h3 className="text-sm font-semibold text-stone-600 dark:text-stone-400 mb-3 flex items-center gap-2">
-                  <BookOpen className="w-4 h-4" />
-                  Vocabulary
-                </h3>
-                {currentPageVocab.map((v, index) => (
-                  <button
-                    key={v.id}
-                    onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
-                    className={clsx(
-                      "w-full text-left px-3 py-2 rounded-lg text-sm transition-all capitalize",
-                      selectedWordIndex === index
-                        ? "bg-stone-500 dark:bg-amber-800 text-white dark:text-amber-100 font-medium"
-                        : "bg-stone-400 dark:bg-neutral-700 text-stone-700 dark:text-stone-300 hover:bg-stone-500 dark:hover:bg-amber-800"
-                    )}
-                  >
-                    {v.word}
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <p className="text-stone-500 dark:text-stone-400 text-sm">
-                No vocabulary on this page
-              </p>
-            )}
           </div>
         )}
       </div>

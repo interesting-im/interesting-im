@@ -9,8 +9,8 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <div className="min-h-screen bg-neutral-900 text-neutral-200">
-      <nav className="border-b border-neutral-700 bg-neutral-800">
-        <div className="max-w-4xl mx-auto px-4 py-3 flex gap-4 items-center">
+      <nav className="border-b border-neutral-700 bg-neutral-800 px-4 md:px-8">
+        <div className="flex gap-6 items-center">
           <Link to="/">
             {({ isActive }) => (
               <Button variant={isActive ? "default" : "ghost"} size="sm">
@@ -27,7 +27,7 @@ function RootComponent() {
           </Link>
         </div>
       </nav>
-      <main className="w-full">
+      <main className="w-full px-4 md:px-6 lg:px-8">
         <Outlet />
       </main>
     </div>

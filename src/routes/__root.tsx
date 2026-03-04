@@ -8,8 +8,8 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <div className="min-h-screen bg-background dark">
-      <nav className="border-b bg-card dark:bg-neutral-800">
+    <div className="min-h-screen bg-neutral-900 text-neutral-100">
+      <nav className="border-b bg-neutral-800">
         <div className="max-w-4xl mx-auto px-4 py-3 flex gap-4 items-center">
           <Link to="/">
             {({ isActive }) => (

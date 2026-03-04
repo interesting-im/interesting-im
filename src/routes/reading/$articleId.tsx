@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Link } from "@tanstack/react-router"
 import { useEffect, useState, useMemo } from "react"
 import { supabaseConfig } from "~/lib/supabase"
-import { ChevronLeft, ChevronRight, BookOpen, Play, Pause, SkipForward } from "lucide-react"
+import { ChevronLeft, ChevronRight, BookOpen, Play, SkipForward } from "lucide-react"
 import clsx from "clsx"
 
 interface Article {
@@ -49,7 +49,6 @@ function ArticlePage() {
       const { url, anonKey } = supabaseConfig
 
       try {
-        // Get article
         const articleRes = await fetch(
           `${url}/rest/v1/reading_articles?id=eq.${articleId}&select=*`,
           {
@@ -72,7 +71,6 @@ function ArticlePage() {
 
         setArticle(articles[0])
 
-        // Get vocabulary for this article
         const vocabRes = await fetch(
           `${url}/rest/v1/reading_vocabulary?article_id=eq.${articleId}&select=*`,
           {
@@ -97,36 +95,22 @@ function ArticlePage() {
     fetchArticle()
   }, [articleId])
 
-  // Split content into pages (by double newlines)
+  // Split content into pages
   const pages = useMemo(() => {
     if (!article?.content) return []
-    // First item is cover page (empty), then content split by paragraphs
     const contentPages = article.content.split('\n\n').filter(p => p.trim())
-    return ['', ...contentPages] // Index 0 = cover, 1+ = content
+    return ['', ...contentPages]
   }, [article?.content])
 
-  // Fuzzy match function - handles plurals, case-insensitive, etc.
+  // Fuzzy match function
   const fuzzyMatch = (word: string, text: string): boolean => {
     const lowerWord = word.toLowerCase()
     const lowerText = text.toLowerCase()
-    
-    // Direct match
     if (lowerText.includes(lowerWord)) return true
-    
-    // Match plural forms (add s, es, ed, ing)
-    const variations = [
-      lowerWord + 's',
-      lowerWord + 'es', 
-      lowerWord + 'ed',
-      lowerWord + 'ing',
-      lowerWord.slice(0, -1) + 'ies', // party -> parties
-      lowerWord.slice(0, -1) + 'ied',  // copy -> copied
-    ]
-    
+    const variations = [lowerWord + 's', lowerWord + 'es', lowerWord + 'ed', lowerWord + 'ing', lowerWord.slice(0, -1) + 'ies', lowerWord.slice(0, -1) + 'ied']
     for (const variant of variations) {
       if (lowerText.includes(variant)) return true
     }
-    
     return false
   }
 
@@ -152,43 +136,18 @@ function ArticlePage() {
     }
   }
 
-  // Handle cover page click
-  const handleCoverClick = () => {
-    goToNextPage()
-  }
-
-  // Highlight word in text - fuzzy matching for plurals, case, etc.
+  // Highlight word in text - fuzzy matching
   const highlightText = (text: string, wordToHighlight: string) => {
     if (!wordToHighlight) return text
     
     const lowerWord = wordToHighlight.toLowerCase()
-    
-    // Build regex with fuzzy variations
-    const variations = [
-      lowerWord,
-      lowerWord + 's',
-      lowerWord + 'es',
-      lowerWord + 'ed',
-      lowerWord + 'ing',
-      lowerWord.slice(0, -1) + 'ies',
-      lowerWord.slice(0, -1) + 'ied',
-    ]
-    
-    // Create regex that matches any variation
+    const variations = [lowerWord, lowerWord + 's', lowerWord + 'es', lowerWord + 'ed', lowerWord + 'ing', lowerWord.slice(0, -1) + 'ies', lowerWord.slice(0, -1) + 'ied']
     const regex = new RegExp(`\\b(${variations.join('|')})\\b`, 'gi')
     const parts = text.split(regex)
     
     return parts.map((part, i) => {
-      if (part.toLowerCase() === lowerWord || 
-          variations.includes(part.toLowerCase())) {
-        return (
-          <mark 
-            key={i} 
-            className="bg-amber-300 bg-amber-700/50 text-amber-900 text-amber-100 px-0.5 rounded"
-          >
-            {part}
-          </mark>
-        )
+      if (part.toLowerCase() === lowerWord || variations.includes(part.toLowerCase())) {
+        return <mark key={i} className="bg-amber-300 text-amber-900 px-0.5 rounded">{part}</mark>
       }
       return part
     })
@@ -196,10 +155,10 @@ function ArticlePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-800/50 flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4 animate-pulse">📖</div>
-          <p className="text-zinc-400 text-zinc-400">Loading story...</p>
+          <p className="text-zinc-400">Loading story...</p>
         </div>
       </div>
     )
@@ -207,13 +166,11 @@ function ArticlePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-zinc-800/50 flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">❌</div>
-          <p className="text-red-600 text-red-400">{error}</p>
-          <Link to="/reading" className="text-zinc-400 text-zinc-400 hover:underline mt-4 block">
-            ← Back to Bookshelf
-          </Link>
+          <p className="text-red-400">{error}</p>
+          <Link to="/reading" className="text-zinc-400 hover:underline mt-4 block">← Back to Bookshelf</Link>
         </div>
       </div>
     )
@@ -221,251 +178,192 @@ function ArticlePage() {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-zinc-800/50 flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">📚</div>
-          <p className="text-zinc-400 text-zinc-400">Story not found</p>
-          <Link to="/reading" className="text-zinc-400 text-zinc-400 hover:underline mt-4 block">
-            ← Back to Bookshelf
-          </Link>
+          <p className="text-zinc-400">Story not found</p>
+          <Link to="/reading" className="text-zinc-400 hover:underline mt-4 block">← Back to Bookshelf</Link>
         </div>
       </div>
     )
   }
 
   const selectedWord = selectedWordIndex >= 0 ? currentPageVocab[selectedWordIndex] : null
-  const contentPages = pages.length - 1 // Excluding cover
+  const contentPages = pages.length - 1
 
   return (
     <div className="min-h-screen bg-zinc-900 flex flex-col">
-      {/* Title Section */}
-      <div id="title" className="flex w-full">
-        <div className="hidden md:block md:basis-1/12 lg:basis-1/8"></div>
-        <div className="basis-full md:basis-11/12 lg:basis-7/8 lg:pt-12 flex justify-center items-center bg-zinc-800/50">
-          <div>
-            <h1 
-              className="mt-4 text-center text-2xl md:text-4xl lg:text-5xl text-stone-200"
-              style={{ fontFamily: "Georgia, serif" }}
-            >
-              {article.title}
-            </h1>
-          </div>
+      {/* Header */}
+      <div className="w-full bg-zinc-800/50 py-4 px-6">
+        <Link to="/reading" className="flex items-center gap-2 text-zinc-400 hover:text-zinc-200 transition-colors">
+          <ChevronLeft className="w-5 h-5" />
+          <span className="text-sm font-medium">Bookshelf</span>
+        </Link>
+      </div>
+
+      {/* Title */}
+      <div className="w-full bg-zinc-800/30 py-8 text-center">
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-zinc-100" style={{ fontFamily: "Georgia, serif" }}>
+          {article.title}
+        </h1>
+        <div className="flex items-center justify-center gap-3 mt-3 text-zinc-400 text-sm">
+          <span>{article.author || "Unknown"}</span>
+          <span>•</span>
+          <span>{article.reading_time_minutes || 5} min</span>
+          <span>•</span>
+          <span className="px-2 py-0.5 bg-zinc-700 rounded-full text-xs">{article.category || "General"}</span>
         </div>
       </div>
 
-      {/* Player Section (for future audio) */}
-      <div id="player" className="flex w-full">
-        <div className="hidden md:block md:basis-1/12 lg:basis-1/8"></div>
-        <div className="basis-full md:basis-11/12 lg:basis-7/8 flex justify-center items-center bg-zinc-800/50">
-          <div className="basis-full md:mt-4">
-            {/* Audio player placeholder - can be integrated later */}
-          </div>
-        </div>
-      </div>
-
-      {/* Page Content */}
-      <div id="page" className="flex w-full flex-1">
-        {/* Left Sidebar - Navigation & Auto settings */}
-        <div className="hidden md:flex md:flex-col md:basis-1/12 lg:basis-1/8 bg-zinc-800/30 p-2">
-            {currentPage === 0 ? (
-              // Cover page: show auto settings
-              <div className="flex flex-col items-center pt-8">
-                <h3 className="text-sm font-semibold text-zinc-400 text-zinc-400 mb-2">AUTO</h3>
-                <label className="flex items-center gap-2 text-sm text-zinc-400 text-zinc-400 cursor-pointer mb-2">
-                  <input 
-                    type="checkbox" 
-                    checked={autoPlay}
-                    onChange={(e) => setAutoPlay(e.target.checked)}
-                    className="rounded text-zinc-400"
-                  />
-                  <Play className="w-3 h-3" />
-                  Read
-                </label>
-                <label className="flex items-center gap-2 text-sm text-zinc-400 text-zinc-400 cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={autoNext}
-                    onChange={(e) => setAutoNext(e.target.checked)}
-                    className="rounded text-zinc-400"
-                  />
-                  <SkipForward className="w-3 h-3" />
-                  Next
-                </label>
-              </div>
-            ) : (
-              // Content pages: show navigation
-              <div className="mt-2 flex flex-col items-center">
-                <button
-                  onClick={goToPrevPage}
-                  disabled={currentPage === 1}
-                  className={clsx(
-                    "h-8 w-8 px-1 py-1 mb-2 justify-center items-center bg-stone-600 text-sm text-white rounded",
-                    "hover:bg-zinc-700 ",
-                    "lg:w-10 lg:px-2",
-                    currentPage === 1 && "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  ↑
-                </button>
-                <div className="w-6 lg:w-16 ml-1 lg:-ml-3 my-4 flex justify-center">
-                  <div className="flex">
-                    <p className="text-zinc-300 text-zinc-300">{currentPage}</p>
-                    <p className="text-zinc-500 mx-1">/</p>
-                    <p className="text-zinc-500">{contentPages}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={goToNextPage}
-                  disabled={currentPage >= contentPages}
-                  className={clsx(
-                    "h-8 w-8 px-1 py-1 mt-2 justify-center items-center bg-stone-600 text-sm text-white rounded",
-                    "hover:bg-zinc-700 ",
-                    "lg:w-10 lg:px-2",
-                    currentPage >= contentPages && "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  ↓
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Main Content */}
-          <div className="basis-full md:basis-7/8 flex">
-            {currentPage === 0 ? (
-              // Cover page with image
-              <div 
-                className="flex p-4 justify-center items-center min-w-full bg-zinc-800/50 cursor-pointer"
-                onClick={handleCoverClick}
-              >
-                {article.image_url ? (
-                  <img
-                    src={article.image_url}
-                    alt={article.title}
-                    height={800}
-                    width={400}
-                    onClick={handleCoverClick}
-                    className="max-h-[500px] object-contain"
-                  />
-                ) : (
-                  <div className="w-48 h-72 bg-gradient-to-br from-zinc-600 to-zinc-800 rounded-lg shadow-2xl flex items-center justify-center">
-                    <BookOpen className="w-16 h-16 text-zinc-200" />
-                  </div>
-                )}
-              </div>
-            ) : (
-              // Content page with highlight
-              <div className="flex flex-col min-w-full pb-4 md:px-4 bg-zinc-800/50">
-                <div className="flex">
-                  {/* Vocabulary buttons */}
-                  <div className="hidden md:flex flex-col md:basis-1/12 md:-ml-3 items-start">
-                    {currentPageVocab.map((v, index) => (
-                      <button
-                        key={v.id}
-                        onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
-                        className={clsx(
-                          "min-w-10 m-1 p-2 bg-zinc-600 bg-zinc-700 text-center text-lg capitalize rounded",
-                          "hover:bg-zinc-500/75 ",
-                          "md:min-w-20",
-                          selectedWordIndex === index
-                            ? "text-zinc-300  font-semibold"
-                            : "text-zinc-300 text-zinc-300/67"
-                        )}
-                      >
-                        {v.word}
-                      </button>
-                    ))}
-                  </div>
-                  
-                  <div className="hidden md:flex mr-2 border-1 border-stone-500/75 border-dashed" />
-                  
-                  {/* Text content */}
-                  <div className="basis-full md:basis-11/12 flex justify-start items-center">
-                    <div>
-                      <div 
-                        className={clsx(
-                          "mx-8 text leading-8 indent-8 text-zinc-400 text-zinc-400 selection:text-amber-700",
-                          "md:min-h-[320px] md:text-lg md:leading-10",
-                          "lg:min-h-[480px] lg:text-2xl lg:leading-12"
-                        )}
-                        style={{ fontFamily: "Georgia, serif" }}
-                      >
-                        {selectedWord ? (
-                          highlightText(pages[currentPage], selectedWord.word)
-                        ) : (
-                          pages[currentPage]
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Definition bar */}
-                <div id="dict" className="flex">
-                  {currentPageVocab.length === 0 || selectedWordIndex === -1 ? (
-                    <div className="w-full p-4 bg-zinc-800/50 text-center text-xl text-zinc-400 text-zinc-400">
-                      &nbsp;
-                    </div>
-                  ) : (
-                    <div className="w-full p-4 bg-zinc-600 bg-zinc-700 text-center text-xl text-zinc-300  capitalize">
-                      {selectedWord?.translation}
-                    </div>
-                  )}
-                </div>
-
-                {/* Mobile vocabulary buttons */}
-                {currentPageVocab.length > 0 && (
-                  <div className="flex mt-4 justify-center items-center md:hidden">
-                    {currentPageVocab.map((v, index) => (
-                      <button
-                        key={v.id}
-                        onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
-                        className={clsx(
-                          "min-w-10 mx-1 p-2 bg-zinc-600 bg-zinc-700 text-center text-lg capitalize rounded",
-                          "hover:bg-zinc-500/75 ",
-                          "md:min-w-20",
-                          selectedWordIndex === index
-                            ? "text-zinc-300  font-semibold"
-                            : "text-zinc-300 text-zinc-300/67"
-                        )}
-                      >
-                        {v.word}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile Navigation */}
-        {currentPage > 0 && (
-          <div id="navi" className="flex justify-center items-center md:hidden my-4">
-            <button 
-              className="mr-8 cursor-pointer" 
-              onClick={goToPrevPage}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft color={currentPage === 1 ? "#9ca3af" : "black"} size={24} strokeWidth={1.5} />
-            </button>
-            <div className="w-6 lg:w-16 ml-1 lg:-ml-3 my-4 flex justify-center">
-              <div className="flex">
-                <p className="text-zinc-300 text-zinc-300">{currentPage}</p>
-                <p className="text-zinc-500 mx-1">/</p>
+      {/* Main Content */}
+      <div className="flex-1 flex">
+        {/* Left Sidebar - Navigation */}
+        <div className="hidden md:flex flex-col w-20 lg:w-32 bg-zinc-800/20 p-4">
+          {currentPage === 0 ? (
+            <div className="flex flex-col items-center pt-8 space-y-4">
+              <h3 className="text-sm font-semibold text-zinc-400">AUTO</h3>
+              <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+                <input type="checkbox" checked={autoPlay} onChange={(e) => setAutoPlay(e.target.checked)} className="rounded" />
+                <Play className="w-3 h-3" />
+              </label>
+              <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+                <input type="checkbox" checked={autoNext} onChange={(e) => setAutoNext(e.target.checked)} className="rounded" />
+                <SkipForward className="w-3 h-3" />
+              </label>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center space-y-4 mt-4">
+              <button onClick={goToPrevPage} disabled={currentPage === 1} className={clsx("w-10 h-10 flex items-center justify-center bg-zinc-700 rounded", currentPage === 1 && "opacity-50 cursor-not-allowed")}>
+                ↑
+              </button>
+              <div className="text-center">
+                <p className="text-zinc-300">{currentPage}</p>
+                <p className="text-zinc-500">/</p>
                 <p className="text-zinc-500">{contentPages}</p>
               </div>
+              <button onClick={goToNextPage} disabled={currentPage >= contentPages} className={clsx("w-10 h-10 flex items-center justify-center bg-zinc-700 rounded", currentPage >= contentPages && "opacity-50 cursor-not-allowed")}>
+                ↓
+              </button>
             </div>
-            <button 
-              className="ml-8 cursor-pointer" 
-              onClick={goToNextPage}
-              disabled={currentPage >= contentPages}
-            >
-              <ChevronRight color={currentPage >= contentPages ? "#9ca3af" : "black"} size={24} strokeWidth={1.5} />
+          )}
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 flex flex-col">
+          {currentPage === 0 ? (
+            /* Cover Page */
+            <div className="flex-1 flex items-center justify-center p-8 bg-zinc-800/20 cursor-pointer" onClick={goToNextPage}>
+              <div className="text-center">
+                {article.image_url ? (
+                  <img src={article.image_url} alt={article.title} className="max-h-[60vh] mx-auto mb-8 rounded-lg shadow-2xl" />
+                ) : (
+                  <div className="w-48 h-72 bg-gradient-to-br from-zinc-600 to-zinc-800 rounded-lg shadow-2xl flex items-center justify-center mb-8">
+                    <BookOpen className="w-16 h-16 text-zinc-300" />
+                  </div>
+                )}
+                <p className="text-zinc-500 text-lg animate-pulse">Click anywhere to start reading →</p>
+              </div>
+            </div>
+          ) : (
+            /* Reading Page */
+            <>
+              <div className="flex-1 p-8 md:p-12 lg:p-16">
+                <div className="max-w-4xl mx-auto">
+                  <div className="text-xl md:text-2xl lg:text-3xl leading-10 md:leading-12 text-zinc-300 indent-8" style={{ fontFamily: "Georgia, serif" }}>
+                    {selectedWord ? highlightText(pages[currentPage], selectedWord.word) : pages[currentPage]}
+                  </div>
+                </div>
+              </div>
+
+              {/* Definition Bar */}
+              <div className="bg-zinc-800 border-t border-zinc-700 p-4">
+                <div className="max-w-4xl mx-auto">
+                  {selectedWord ? (
+                    <div>
+                      <span className="text-lg font-semibold text-zinc-100">{selectedWord.word}</span>
+                      {selectedWord.pronunciation && <span className="text-zinc-400 ml-2">{selectedWord.pronunciation}</span>}
+                      {selectedWord.part_of_speech && <span className="text-xs px-2 py-0.5 bg-zinc-700 rounded ml-2 text-zinc-300">{selectedWord.part_of_speech}</span>}
+                      <p className="text-zinc-300 mt-1">{selectedWord.translation}</p>
+                    </div>
+                  ) : (
+                    <p className="text-zinc-500 text-center">
+                      {currentPageVocab.length > 0 ? "👆 Click a vocabulary word to see its meaning" : "No vocabulary words on this page"}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Mobile Vocab Buttons */}
+              {currentPageVocab.length > 0 && (
+                <div className="md:hidden bg-zinc-800/50 border-t border-zinc-700 p-3">
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {currentPageVocab.map((v, index) => (
+                      <button key={v.id} onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)} className={clsx("px-3 py-1.5 rounded-full text-sm", selectedWordIndex === index ? "bg-amber-400 text-amber-900 font-medium" : "bg-zinc-700 text-zinc-300")}>
+                        {v.word}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Page Navigation */}
+              <div className="bg-zinc-800/50 border-t border-zinc-700 p-4">
+                <div className="max-w-4xl mx-auto flex items-center justify-between">
+                  <button onClick={goToPrevPage} disabled={currentPage === 1} className={clsx("flex items-center gap-2 px-4 py-2 rounded-lg", currentPage === 1 ? "text-zinc-600" : "text-zinc-300 hover:bg-zinc-700")}>
+                    <ChevronLeft className="w-5 h-5" />
+                    <span className="hidden sm:inline">Previous</span>
+                  </button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: contentPages }, (_, i) => i + 1).map((i) => (
+                      <button key={i} onClick={() => { setCurrentPage(i); setSelectedWordIndex(-1); }} className={clsx("w-2 h-2 rounded-full", i === currentPage ? "bg-amber-400 w-6" : "bg-zinc-600 hover:bg-zinc-500")} />
+                    ))}
+                  </div>
+                  <button onClick={goToNextPage} disabled={currentPage >= contentPages} className={clsx("flex items-center gap-2 px-4 py-2 rounded-lg", currentPage >= contentPages ? "text-zinc-600" : "text-zinc-300 hover:bg-zinc-700")}>
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      {currentPage > 0 && (
+        <div className="md:hidden bg-zinc-800 border-t border-zinc-700 p-3">
+          <div className="flex justify-center items-center gap-8">
+            <button onClick={goToPrevPage} disabled={currentPage === 1} className={clsx("p-2 rounded-lg", currentPage === 1 ? "text-zinc-600" : "text-zinc-300")}>
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <span className="text-zinc-300 font-medium">{currentPage} / {contentPages}</span>
+            <button onClick={goToNextPage} disabled={currentPage >= contentPages} className={clsx("p-2 rounded-lg", currentPage >= contentPages ? "text-zinc-600" : "text-zinc-300")}>
+              <ChevronRight className="w-6 h-6" />
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Vocabulary Panel */}
+      {vocabulary.length > 0 && currentPage > 0 && (
+        <div className="bg-zinc-800/30 border-t border-zinc-700 p-6">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-lg font-semibold text-zinc-200 mb-4">📚 All Vocabulary ({vocabulary.length} words)</h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {vocabulary.map((v) => (
+                <div key={v.id} className="bg-zinc-800 rounded-lg p-3 border border-zinc-700">
+                  <div className="flex items-start justify-between">
+                    <span className="font-medium text-zinc-100 capitalize">{v.word}</span>
+                    {v.pronunciation && <span className="text-xs text-zinc-500">{v.pronunciation}</span>}
+                  </div>
+                  <p className="text-zinc-400 text-sm mt-1">{v.translation}</p>
+                  {v.part_of_speech && <span className="text-xs text-zinc-500 mt-1 block">{v.part_of_speech}</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

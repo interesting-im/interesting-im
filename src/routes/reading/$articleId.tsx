@@ -105,12 +105,36 @@ function ArticlePage() {
     return ['', ...contentPages] // Index 0 = cover, 1+ = content
   }, [article?.content])
 
+  // Fuzzy match function - handles plurals, case-insensitive, etc.
+  const fuzzyMatch = (word: string, text: string): boolean => {
+    const lowerWord = word.toLowerCase()
+    const lowerText = text.toLowerCase()
+    
+    // Direct match
+    if (lowerText.includes(lowerWord)) return true
+    
+    // Match plural forms (add s, es, ed, ing)
+    const variations = [
+      lowerWord + 's',
+      lowerWord + 'es', 
+      lowerWord + 'ed',
+      lowerWord + 'ing',
+      lowerWord.slice(0, -1) + 'ies', // party -> parties
+      lowerWord.slice(0, -1) + 'ied',  // copy -> copied
+    ]
+    
+    for (const variant of variations) {
+      if (lowerText.includes(variant)) return true
+    }
+    
+    return false
+  }
+
   // Get vocabulary for current page
   const currentPageVocab = useMemo(() => {
     if (!vocabulary.length || currentPage === 0) return []
-    // Simple matching: check if vocabulary word appears in current page content
-    const pageText = pages[currentPage]?.toLowerCase() || ''
-    return vocabulary.filter(v => pageText.includes(v.word.toLowerCase()))
+    const pageText = pages[currentPage] || ''
+    return vocabulary.filter(v => fuzzyMatch(v.word, pageText))
   }, [vocabulary, pages, currentPage])
 
   // Navigation handlers
@@ -133,15 +157,30 @@ function ArticlePage() {
     goToNextPage()
   }
 
-  // Highlight word in text
+  // Highlight word in text - fuzzy matching for plurals, case, etc.
   const highlightText = (text: string, wordToHighlight: string) => {
     if (!wordToHighlight) return text
     
-    const regex = new RegExp(`(\\b${wordToHighlight}\\b)`, 'gi')
+    const lowerWord = wordToHighlight.toLowerCase()
+    
+    // Build regex with fuzzy variations
+    const variations = [
+      lowerWord,
+      lowerWord + 's',
+      lowerWord + 'es',
+      lowerWord + 'ed',
+      lowerWord + 'ing',
+      lowerWord.slice(0, -1) + 'ies',
+      lowerWord.slice(0, -1) + 'ied',
+    ]
+    
+    // Create regex that matches any variation
+    const regex = new RegExp(`\\b(${variations.join('|')})\\b`, 'gi')
     const parts = text.split(regex)
     
     return parts.map((part, i) => {
-      if (part.toLowerCase() === wordToHighlight.toLowerCase()) {
+      if (part.toLowerCase() === lowerWord || 
+          variations.includes(part.toLowerCase())) {
         return (
           <mark 
             key={i} 

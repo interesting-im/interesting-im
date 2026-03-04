@@ -184,7 +184,7 @@ function ArticlePage() {
         return (
           <mark 
             key={i} 
-            className="bg-amber-300 dark:bg-amber-700/50 text-amber-900 dark:text-amber-100 px-0.5 rounded"
+            className="bg-amber-300 bg-amber-700/50 text-amber-900 text-amber-100 px-0.5 rounded"
           >
             {part}
           </mark>
@@ -199,7 +199,7 @@ function ArticlePage() {
       <div className="min-h-screen bg-zinc-800/50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4 animate-pulse">📖</div>
-          <p className="text-stone-600 dark:text-stone-400">Loading story...</p>
+          <p className="text-zinc-400 text-zinc-400">Loading story...</p>
         </div>
       </div>
     )
@@ -210,8 +210,8 @@ function ArticlePage() {
       <div className="min-h-screen bg-zinc-800/50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">❌</div>
-          <p className="text-red-600 dark:text-red-400">{error}</p>
-          <Link to="/reading" className="text-stone-600 dark:text-stone-400 hover:underline mt-4 block">
+          <p className="text-red-600 text-red-400">{error}</p>
+          <Link to="/reading" className="text-zinc-400 text-zinc-400 hover:underline mt-4 block">
             ← Back to Bookshelf
           </Link>
         </div>
@@ -224,8 +224,8 @@ function ArticlePage() {
       <div className="min-h-screen bg-zinc-800/50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">📚</div>
-          <p className="text-stone-600 dark:text-stone-400">Story not found</p>
-          <Link to="/reading" className="text-stone-600 dark:text-stone-400 hover:underline mt-4 block">
+          <p className="text-zinc-400 text-zinc-400">Story not found</p>
+          <Link to="/reading" className="text-zinc-400 text-zinc-400 hover:underline mt-4 block">
             ← Back to Bookshelf
           </Link>
         </div>
@@ -270,23 +270,23 @@ function ArticlePage() {
             {currentPage === 0 ? (
               // Cover page: show auto settings
               <div className="flex flex-col items-center pt-8">
-                <h3 className="text-sm font-semibold text-stone-600 dark:text-stone-400 mb-2">AUTO</h3>
-                <label className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400 cursor-pointer mb-2">
+                <h3 className="text-sm font-semibold text-zinc-400 text-zinc-400 mb-2">AUTO</h3>
+                <label className="flex items-center gap-2 text-sm text-zinc-400 text-zinc-400 cursor-pointer mb-2">
                   <input 
                     type="checkbox" 
                     checked={autoPlay}
                     onChange={(e) => setAutoPlay(e.target.checked)}
-                    className="rounded text-stone-600"
+                    className="rounded text-zinc-400"
                   />
                   <Play className="w-3 h-3" />
                   Read
                 </label>
-                <label className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm text-zinc-400 text-zinc-400 cursor-pointer">
                   <input 
                     type="checkbox" 
                     checked={autoNext}
                     onChange={(e) => setAutoNext(e.target.checked)}
-                    className="rounded text-stone-600"
+                    className="rounded text-zinc-400"
                   />
                   <SkipForward className="w-3 h-3" />
                   Next
@@ -300,7 +300,7 @@ function ArticlePage() {
                   disabled={currentPage === 1}
                   className={clsx(
                     "h-8 w-8 px-1 py-1 mb-2 justify-center items-center bg-stone-600 text-sm text-white rounded",
-                    "hover:bg-stone-800 dark:hover:bg-zinc-600",
+                    "hover:bg-zinc-700 ",
                     "lg:w-10 lg:px-2",
                     currentPage === 1 && "opacity-50 cursor-not-allowed"
                   )}
@@ -309,9 +309,9 @@ function ArticlePage() {
                 </button>
                 <div className="w-6 lg:w-16 ml-1 lg:-ml-3 my-4 flex justify-center">
                   <div className="flex">
-                    <p className="text-stone-700 dark:text-stone-300">{currentPage}</p>
-                    <p className="text-stone-500 mx-1">/</p>
-                    <p className="text-stone-500">{contentPages}</p>
+                    <p className="text-zinc-300 text-zinc-300">{currentPage}</p>
+                    <p className="text-zinc-500 mx-1">/</p>
+                    <p className="text-zinc-500">{contentPages}</p>
                   </div>
                 </div>
                 <button
@@ -319,7 +319,7 @@ function ArticlePage() {
                   disabled={currentPage >= contentPages}
                   className={clsx(
                     "h-8 w-8 px-1 py-1 mt-2 justify-center items-center bg-stone-600 text-sm text-white rounded",
-                    "hover:bg-stone-800 dark:hover:bg-zinc-600",
+                    "hover:bg-zinc-700 ",
                     "lg:w-10 lg:px-2",
                     currentPage >= contentPages && "opacity-50 cursor-not-allowed"
                   )}
@@ -364,12 +364,12 @@ function ArticlePage() {
                         key={v.id}
                         onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
                         className={clsx(
-                          "min-w-10 m-1 p-2 bg-stone-400 dark:bg-neutral-700 text-center text-lg capitalize rounded",
-                          "hover:bg-stone-500/75 dark:hover:bg-zinc-700",
+                          "min-w-10 m-1 p-2 bg-zinc-600 bg-zinc-700 text-center text-lg capitalize rounded",
+                          "hover:bg-zinc-500/75 ",
                           "md:min-w-20",
                           selectedWordIndex === index
-                            ? "text-stone-700 dark:text-zinc-200 font-semibold"
-                            : "text-stone-700 dark:text-stone-300/67"
+                            ? "text-zinc-300  font-semibold"
+                            : "text-zinc-300 text-zinc-300/67"
                         )}
                       >
                         {v.word}
@@ -384,7 +384,7 @@ function ArticlePage() {
                     <div>
                       <div 
                         className={clsx(
-                          "mx-8 text leading-8 indent-8 text-stone-600 dark:text-stone-400 selection:text-amber-700",
+                          "mx-8 text leading-8 indent-8 text-zinc-400 text-zinc-400 selection:text-amber-700",
                           "md:min-h-[320px] md:text-lg md:leading-10",
                           "lg:min-h-[480px] lg:text-2xl lg:leading-12"
                         )}
@@ -403,11 +403,11 @@ function ArticlePage() {
                 {/* Definition bar */}
                 <div id="dict" className="flex">
                   {currentPageVocab.length === 0 || selectedWordIndex === -1 ? (
-                    <div className="w-full p-4 bg-zinc-800/50 text-center text-xl text-stone-600 dark:text-stone-400">
+                    <div className="w-full p-4 bg-zinc-800/50 text-center text-xl text-zinc-400 text-zinc-400">
                       &nbsp;
                     </div>
                   ) : (
-                    <div className="w-full p-4 bg-stone-400 dark:bg-neutral-700 text-center text-xl text-stone-700 dark:text-zinc-200 capitalize">
+                    <div className="w-full p-4 bg-zinc-600 bg-zinc-700 text-center text-xl text-zinc-300  capitalize">
                       {selectedWord?.translation}
                     </div>
                   )}
@@ -421,12 +421,12 @@ function ArticlePage() {
                         key={v.id}
                         onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
                         className={clsx(
-                          "min-w-10 mx-1 p-2 bg-stone-400 dark:bg-neutral-700 text-center text-lg capitalize rounded",
-                          "hover:bg-stone-500/75 dark:hover:bg-zinc-700",
+                          "min-w-10 mx-1 p-2 bg-zinc-600 bg-zinc-700 text-center text-lg capitalize rounded",
+                          "hover:bg-zinc-500/75 ",
                           "md:min-w-20",
                           selectedWordIndex === index
-                            ? "text-stone-700 dark:text-zinc-200 font-semibold"
-                            : "text-stone-700 dark:text-stone-300/67"
+                            ? "text-zinc-300  font-semibold"
+                            : "text-zinc-300 text-zinc-300/67"
                         )}
                       >
                         {v.word}
@@ -451,9 +451,9 @@ function ArticlePage() {
             </button>
             <div className="w-6 lg:w-16 ml-1 lg:-ml-3 my-4 flex justify-center">
               <div className="flex">
-                <p className="text-stone-700 dark:text-stone-300">{currentPage}</p>
-                <p className="text-stone-500 mx-1">/</p>
-                <p className="text-stone-500">{contentPages}</p>
+                <p className="text-zinc-300 text-zinc-300">{currentPage}</p>
+                <p className="text-zinc-500 mx-1">/</p>
+                <p className="text-zinc-500">{contentPages}</p>
               </div>
             </div>
             <button 

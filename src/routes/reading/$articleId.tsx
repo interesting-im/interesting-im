@@ -187,7 +187,7 @@ function ArticlePage() {
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
       {/* Header */}
-      <div className="w-full bg-stone-800/50 py-4 px-6">
+      <div className="w-full bg-neutral-800/50 py-4 px-6">
         <Link to="/reading" className="flex items-center gap-2 text-neutral-400 hover:text-neutral-200 transition-colors">
           <ChevronLeft className="w-5 h-5" />
           <span className="text-sm font-medium">Bookshelf</span>
@@ -195,7 +195,7 @@ function ArticlePage() {
       </div>
 
       {/* Title */}
-      <div className="w-full bg-stone-800/30 py-8 text-center">
+      <div className="w-full bg-neutral-800/30 py-8 text-center">
         <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-neutral-100" style={{ fontFamily: "Georgia, serif" }}>
           {article.title}
         </h1>
@@ -211,7 +211,7 @@ function ArticlePage() {
       {/* Main Content with Sidebar */}
       <div className="flex-1 flex">
         {/* Left Sidebar - Navigation */}
-        <div className="hidden md:flex flex-col w-20 lg:w-32 bg-stone-800/20 p-4">
+        <div className="hidden md:flex flex-col w-20 lg:w-32 bg-neutral-800/20 p-4">
           {currentPage === 0 ? (
             <div className="flex flex-col items-center pt-8 space-y-4">
               <h3 className="text-sm font-semibold text-neutral-400">AUTO</h3>
@@ -245,7 +245,7 @@ function ArticlePage() {
         <div className="flex-1 flex flex-col">
           {currentPage === 0 ? (
             /* Cover Page */
-            <div className="flex-1 flex items-center justify-center p-8 bg-stone-800/20 cursor-pointer" onClick={goToNextPage}>
+            <div className="flex-1 flex items-center justify-center p-8 bg-neutral-800/20 cursor-pointer" onClick={goToNextPage}>
               <div className="text-center">
                 {article.image_url ? (
                   <img src={article.image_url} alt={article.title} className="max-h-[60vh] mx-auto mb-8 rounded-lg shadow-2xl" />
@@ -261,7 +261,7 @@ function ArticlePage() {
             /* Reading Page */
             <>
               <div className="flex-1 p-8 md:p-12 lg:p-16">
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-7xl mx-auto">
                   <div className="text-xl md:text-2xl lg:text-3xl leading-10 md:leading-12 text-neutral-300 indent-8" style={{ fontFamily: "Georgia, serif" }}>
                     {selectedWord ? highlightText(pages[currentPage], selectedWord.word) : pages[currentPage]}
                   </div>
@@ -270,7 +270,7 @@ function ArticlePage() {
 
               {/* Definition Bar */}
               <div className="bg-zinc-800 border-t border-neutral-700 p-4">
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-7xl mx-auto">
                   {selectedWord ? (
                     <div>
                       <span className="text-lg font-semibold text-neutral-100">{selectedWord.word}</span>
@@ -287,8 +287,8 @@ function ArticlePage() {
               </div>
 
               {/* Page Navigation */}
-              <div className="bg-stone-800/50 border-t border-neutral-700 p-4">
-                <div className="max-w-4xl mx-auto flex items-center justify-between">
+              <div className="bg-neutral-800/50 border-t border-neutral-700 p-4">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
                   <button onClick={goToPrevPage} disabled={currentPage === 1} className={clsx("flex items-center gap-2 px-4 py-2 rounded-lg", currentPage === 1 ? "text-neutral-600" : "text-neutral-300 hover:bg-neutral-700")}>
                     <ChevronLeft className="w-5 h-5" />
                     <span className="hidden sm:inline">Previous</span>
@@ -310,7 +310,7 @@ function ArticlePage() {
 
         {/* Right Sidebar - Vocabulary */}
         {currentPage > 0 && (
-          <div className="hidden lg:flex flex-col w-48 xl:w-56 bg-stone-800/20 p-4 border-l border-neutral-700">
+          <div className="hidden lg:flex flex-col w-48 xl:w-56 bg-neutral-800/20 p-4 border-l border-neutral-700">
             <div className="sticky top-24">
               <h3 className="text-sm font-semibold text-neutral-400 mb-3 flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />
@@ -360,7 +360,7 @@ function ArticlePage() {
 
       {/* Mobile Vocabulary Buttons */}
       {currentPage > 0 && currentPageVocab.length > 0 && (
-        <div className="md:hidden bg-stone-800/50 border-t border-neutral-700 p-3">
+        <div className="md:hidden bg-neutral-800/50 border-t border-neutral-700 p-3">
           <div className="flex flex-wrap gap-2 justify-center">
             {currentPageVocab.map((v, index) => (
               <button key={v.id} onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)} className={clsx("px-3 py-1.5 rounded-full text-sm", selectedWordIndex === index ? "bg-amber-400 text-amber-900 font-medium" : "bg-neutral-700 text-neutral-300")}>

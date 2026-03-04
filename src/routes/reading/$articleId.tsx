@@ -196,7 +196,7 @@ function ArticlePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-amber-100/50 dark:bg-zinc-800/50 flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-800/50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4 animate-pulse">📖</div>
           <p className="text-stone-600 dark:text-stone-400">Loading story...</p>
@@ -207,7 +207,7 @@ function ArticlePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-amber-100/50 dark:bg-zinc-800/50 flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-800/50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">❌</div>
           <p className="text-red-600 dark:text-red-400">{error}</p>
@@ -221,7 +221,7 @@ function ArticlePage() {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-amber-100/50 dark:bg-zinc-800/50 flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-800/50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">📚</div>
           <p className="text-stone-600 dark:text-stone-400">Story not found</p>
@@ -236,46 +236,37 @@ function ArticlePage() {
   const selectedWord = selectedWordIndex >= 0 ? currentPageVocab[selectedWordIndex] : null
   const contentPages = pages.length - 1 // Excluding cover
 
-  // Left sidebar classes based on page
-  const leftSidebarClasses = clsx(
-    currentPage === 0
-      ? "lg:flex lg:bg-amber-100/10 lg:dark:bg-zinc-800/10"
-      : "md:flex bg-amber-100/20 dark:bg-zinc-800/20",
-    "hidden md:basis-1/8"
-  )
-
   return (
-    <div className="ml-4 mr-4 flex justify-center min-h-screen">
-      <div className="basis lg:basis-2/3 xl:basis-3/4 2xl:basis-5/6 flex flex-col">
-        {/* Title Section */}
-        <div id="title" className="flex w-full">
-          <div className={leftSidebarClasses}></div>
-          <div className="basis-full md:basis-7/8 lg:pt-12 flex justify-center items-center bg-amber-100/50 dark:bg-zinc-800/50">
-            <div>
-              <h1 
-                className="mt-4 text-center text-2xl md:text-4xl lg:text-5xl text-stone-700 dark:text-stone-300"
-                style={{ fontFamily: "Georgia, serif" }}
-              >
-                {article.title}
-              </h1>
-            </div>
+    <div className="min-h-screen bg-zinc-900 flex flex-col">
+      {/* Title Section */}
+      <div id="title" className="flex w-full">
+        <div className="hidden md:block md:basis-1/12 lg:basis-1/8"></div>
+        <div className="basis-full md:basis-11/12 lg:basis-7/8 lg:pt-12 flex justify-center items-center bg-zinc-800/50">
+          <div>
+            <h1 
+              className="mt-4 text-center text-2xl md:text-4xl lg:text-5xl text-stone-200"
+              style={{ fontFamily: "Georgia, serif" }}
+            >
+              {article.title}
+            </h1>
           </div>
         </div>
+      </div>
 
-        {/* Player Section (for future audio) */}
-        <div id="player" className="flex w-full">
-          <div className={leftSidebarClasses}></div>
-          <div className="basis-full md:basis-7/8 flex justify-center items-center bg-amber-100/50 dark:bg-zinc-800/50">
-            <div className="basis-full md:mt-4">
-              {/* Audio player placeholder - can be integrated later */}
-            </div>
+      {/* Player Section (for future audio) */}
+      <div id="player" className="flex w-full">
+        <div className="hidden md:block md:basis-1/12 lg:basis-1/8"></div>
+        <div className="basis-full md:basis-11/12 lg:basis-7/8 flex justify-center items-center bg-zinc-800/50">
+          <div className="basis-full md:mt-4">
+            {/* Audio player placeholder - can be integrated later */}
           </div>
         </div>
+      </div>
 
-        {/* Page Content */}
-        <div id="page" className="flex w-full">
-          {/* Left Sidebar - Navigation & Auto settings */}
-          <div className={leftSidebarClasses}>
+      {/* Page Content */}
+      <div id="page" className="flex w-full flex-1">
+        {/* Left Sidebar - Navigation & Auto settings */}
+        <div className="hidden md:flex md:flex-col md:basis-1/12 lg:basis-1/8 bg-zinc-800/30 p-2">
             {currentPage === 0 ? (
               // Cover page: show auto settings
               <div className="flex flex-col items-center pt-8">
@@ -309,7 +300,7 @@ function ArticlePage() {
                   disabled={currentPage === 1}
                   className={clsx(
                     "h-8 w-8 px-1 py-1 mb-2 justify-center items-center bg-stone-600 text-sm text-white rounded",
-                    "hover:bg-stone-800 dark:hover:bg-amber-600",
+                    "hover:bg-stone-800 dark:hover:bg-zinc-600",
                     "lg:w-10 lg:px-2",
                     currentPage === 1 && "opacity-50 cursor-not-allowed"
                   )}
@@ -328,7 +319,7 @@ function ArticlePage() {
                   disabled={currentPage >= contentPages}
                   className={clsx(
                     "h-8 w-8 px-1 py-1 mt-2 justify-center items-center bg-stone-600 text-sm text-white rounded",
-                    "hover:bg-stone-800 dark:hover:bg-amber-600",
+                    "hover:bg-stone-800 dark:hover:bg-zinc-600",
                     "lg:w-10 lg:px-2",
                     currentPage >= contentPages && "opacity-50 cursor-not-allowed"
                   )}
@@ -344,7 +335,7 @@ function ArticlePage() {
             {currentPage === 0 ? (
               // Cover page with image
               <div 
-                className="flex p-4 justify-center items-center min-w-full bg-amber-100/50 dark:bg-zinc-800/50 cursor-pointer"
+                className="flex p-4 justify-center items-center min-w-full bg-zinc-800/50 cursor-pointer"
                 onClick={handleCoverClick}
               >
                 {article.image_url ? (
@@ -357,14 +348,14 @@ function ArticlePage() {
                     className="max-h-[500px] object-contain"
                   />
                 ) : (
-                  <div className="w-48 h-72 bg-gradient-to-br from-amber-600 to-amber-800 rounded-lg shadow-2xl flex items-center justify-center">
-                    <BookOpen className="w-16 h-16 text-amber-200" />
+                  <div className="w-48 h-72 bg-gradient-to-br from-zinc-600 to-zinc-800 rounded-lg shadow-2xl flex items-center justify-center">
+                    <BookOpen className="w-16 h-16 text-zinc-200" />
                   </div>
                 )}
               </div>
             ) : (
               // Content page with highlight
-              <div className="flex flex-col min-w-full pb-4 md:px-4 bg-amber-100/50 dark:bg-zinc-800/50">
+              <div className="flex flex-col min-w-full pb-4 md:px-4 bg-zinc-800/50">
                 <div className="flex">
                   {/* Vocabulary buttons */}
                   <div className="hidden md:flex flex-col md:basis-1/12 md:-ml-3 items-start">
@@ -374,10 +365,10 @@ function ArticlePage() {
                         onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
                         className={clsx(
                           "min-w-10 m-1 p-2 bg-stone-400 dark:bg-neutral-700 text-center text-lg capitalize rounded",
-                          "hover:bg-stone-500/75 dark:hover:bg-amber-800",
+                          "hover:bg-stone-500/75 dark:hover:bg-zinc-700",
                           "md:min-w-20",
                           selectedWordIndex === index
-                            ? "text-stone-700 dark:text-amber-200 font-semibold"
+                            ? "text-stone-700 dark:text-zinc-200 font-semibold"
                             : "text-stone-700 dark:text-stone-300/67"
                         )}
                       >
@@ -412,11 +403,11 @@ function ArticlePage() {
                 {/* Definition bar */}
                 <div id="dict" className="flex">
                   {currentPageVocab.length === 0 || selectedWordIndex === -1 ? (
-                    <div className="w-full p-4 bg-amber-100/50 dark:bg-zinc-800/50 text-center text-xl text-stone-600 dark:text-stone-400">
+                    <div className="w-full p-4 bg-zinc-800/50 text-center text-xl text-stone-600 dark:text-stone-400">
                       &nbsp;
                     </div>
                   ) : (
-                    <div className="w-full p-4 bg-stone-400 dark:bg-neutral-700 text-center text-xl text-stone-700 dark:text-amber-200 capitalize">
+                    <div className="w-full p-4 bg-stone-400 dark:bg-neutral-700 text-center text-xl text-stone-700 dark:text-zinc-200 capitalize">
                       {selectedWord?.translation}
                     </div>
                   )}
@@ -431,10 +422,10 @@ function ArticlePage() {
                         onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
                         className={clsx(
                           "min-w-10 mx-1 p-2 bg-stone-400 dark:bg-neutral-700 text-center text-lg capitalize rounded",
-                          "hover:bg-stone-500/75 dark:hover:bg-amber-800",
+                          "hover:bg-stone-500/75 dark:hover:bg-zinc-700",
                           "md:min-w-20",
                           selectedWordIndex === index
-                            ? "text-stone-700 dark:text-amber-200 font-semibold"
+                            ? "text-stone-700 dark:text-zinc-200 font-semibold"
                             : "text-stone-700 dark:text-stone-300/67"
                         )}
                       >

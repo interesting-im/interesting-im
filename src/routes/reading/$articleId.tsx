@@ -148,10 +148,10 @@ function ArticlePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
+      <div className="min-h-screen bg-neutral-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4 animate-pulse">📖</div>
-          <p className="text-zinc-400">Loading story...</p>
+          <p className="text-neutral-400">Loading story...</p>
         </div>
       </div>
     )
@@ -159,11 +159,11 @@ function ArticlePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
+      <div className="min-h-screen bg-neutral-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">❌</div>
           <p className="text-red-400">{error}</p>
-          <Link to="/reading" className="text-zinc-400 hover:underline mt-4 block">← Back to Bookshelf</Link>
+          <Link to="/reading" className="text-neutral-400 hover:underline mt-4 block">← Back to Bookshelf</Link>
         </div>
       </div>
     )
@@ -171,11 +171,11 @@ function ArticlePage() {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
+      <div className="min-h-screen bg-neutral-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">📚</div>
-          <p className="text-zinc-400">Story not found</p>
-          <Link to="/reading" className="text-zinc-400 hover:underline mt-4 block">← Back to Bookshelf</Link>
+          <p className="text-neutral-400">Story not found</p>
+          <Link to="/reading" className="text-neutral-400 hover:underline mt-4 block">← Back to Bookshelf</Link>
         </div>
       </div>
     )
@@ -185,56 +185,56 @@ function ArticlePage() {
   const contentPages = pages.length - 1
 
   return (
-    <div className="min-h-screen bg-zinc-900 flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       {/* Header */}
-      <div className="w-full bg-zinc-800/50 py-4 px-6">
-        <Link to="/reading" className="flex items-center gap-2 text-zinc-400 hover:text-zinc-200 transition-colors">
+      <div className="w-full bg-stone-800/50 py-4 px-6">
+        <Link to="/reading" className="flex items-center gap-2 text-neutral-400 hover:text-neutral-200 transition-colors">
           <ChevronLeft className="w-5 h-5" />
           <span className="text-sm font-medium">Bookshelf</span>
         </Link>
       </div>
 
       {/* Title */}
-      <div className="w-full bg-zinc-800/30 py-8 text-center">
-        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-zinc-100" style={{ fontFamily: "Georgia, serif" }}>
+      <div className="w-full bg-stone-800/30 py-8 text-center">
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-neutral-100" style={{ fontFamily: "Georgia, serif" }}>
           {article.title}
         </h1>
-        <div className="flex items-center justify-center gap-3 mt-3 text-zinc-400 text-sm">
+        <div className="flex items-center justify-center gap-3 mt-3 text-neutral-400 text-sm">
           <span>{article.author || "Unknown"}</span>
           <span>•</span>
           <span>{article.reading_time_minutes || 5} min</span>
           <span>•</span>
-          <span className="px-2 py-0.5 bg-zinc-700 rounded-full text-xs">{article.category || "General"}</span>
+          <span className="px-2 py-0.5 bg-neutral-700 rounded-full text-xs">{article.category || "General"}</span>
         </div>
       </div>
 
       {/* Main Content with Sidebar */}
       <div className="flex-1 flex">
         {/* Left Sidebar - Navigation */}
-        <div className="hidden md:flex flex-col w-20 lg:w-32 bg-zinc-800/20 p-4">
+        <div className="hidden md:flex flex-col w-20 lg:w-32 bg-stone-800/20 p-4">
           {currentPage === 0 ? (
             <div className="flex flex-col items-center pt-8 space-y-4">
-              <h3 className="text-sm font-semibold text-zinc-400">AUTO</h3>
-              <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+              <h3 className="text-sm font-semibold text-neutral-400">AUTO</h3>
+              <label className="flex items-center gap-2 text-sm text-neutral-400 cursor-pointer">
                 <input type="checkbox" checked={autoPlay} onChange={(e) => setAutoPlay(e.target.checked)} className="rounded" />
                 <Play className="w-3 h-3" />
               </label>
-              <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-neutral-400 cursor-pointer">
                 <input type="checkbox" checked={autoNext} onChange={(e) => setAutoNext(e.target.checked)} className="rounded" />
                 <SkipForward className="w-3 h-3" />
               </label>
             </div>
           ) : (
             <div className="flex flex-col items-center space-y-4 mt-4">
-              <button onClick={goToPrevPage} disabled={currentPage === 1} className={clsx("w-10 h-10 flex items-center justify-center bg-zinc-700 rounded", currentPage === 1 && "opacity-50 cursor-not-allowed")}>
+              <button onClick={goToPrevPage} disabled={currentPage === 1} className={clsx("w-10 h-10 flex items-center justify-center bg-neutral-700 rounded", currentPage === 1 && "opacity-50 cursor-not-allowed")}>
                 ↑
               </button>
               <div className="text-center">
-                <p className="text-zinc-300">{currentPage}</p>
-                <p className="text-zinc-500">/</p>
-                <p className="text-zinc-500">{contentPages}</p>
+                <p className="text-neutral-300">{currentPage}</p>
+                <p className="text-neutral-500">/</p>
+                <p className="text-neutral-500">{contentPages}</p>
               </div>
-              <button onClick={goToNextPage} disabled={currentPage >= contentPages} className={clsx("w-10 h-10 flex items-center justify-center bg-zinc-700 rounded", currentPage >= contentPages && "opacity-50 cursor-not-allowed")}>
+              <button onClick={goToNextPage} disabled={currentPage >= contentPages} className={clsx("w-10 h-10 flex items-center justify-center bg-neutral-700 rounded", currentPage >= contentPages && "opacity-50 cursor-not-allowed")}>
                 ↓
               </button>
             </div>
@@ -245,16 +245,16 @@ function ArticlePage() {
         <div className="flex-1 flex flex-col">
           {currentPage === 0 ? (
             /* Cover Page */
-            <div className="flex-1 flex items-center justify-center p-8 bg-zinc-800/20 cursor-pointer" onClick={goToNextPage}>
+            <div className="flex-1 flex items-center justify-center p-8 bg-stone-800/20 cursor-pointer" onClick={goToNextPage}>
               <div className="text-center">
                 {article.image_url ? (
                   <img src={article.image_url} alt={article.title} className="max-h-[60vh] mx-auto mb-8 rounded-lg shadow-2xl" />
                 ) : (
                   <div className="w-48 h-72 bg-gradient-to-br from-zinc-600 to-zinc-800 rounded-lg shadow-2xl flex items-center justify-center mb-8">
-                    <BookOpen className="w-16 h-16 text-zinc-300" />
+                    <BookOpen className="w-16 h-16 text-neutral-300" />
                   </div>
                 )}
-                <p className="text-zinc-500 text-lg animate-pulse">Click anywhere to start reading →</p>
+                <p className="text-neutral-500 text-lg animate-pulse">Click anywhere to start reading →</p>
               </div>
             </div>
           ) : (
@@ -262,24 +262,24 @@ function ArticlePage() {
             <>
               <div className="flex-1 p-8 md:p-12 lg:p-16">
                 <div className="max-w-4xl mx-auto">
-                  <div className="text-xl md:text-2xl lg:text-3xl leading-10 md:leading-12 text-zinc-300 indent-8" style={{ fontFamily: "Georgia, serif" }}>
+                  <div className="text-xl md:text-2xl lg:text-3xl leading-10 md:leading-12 text-neutral-300 indent-8" style={{ fontFamily: "Georgia, serif" }}>
                     {selectedWord ? highlightText(pages[currentPage], selectedWord.word) : pages[currentPage]}
                   </div>
                 </div>
               </div>
 
               {/* Definition Bar */}
-              <div className="bg-zinc-800 border-t border-zinc-700 p-4">
+              <div className="bg-zinc-800 border-t border-neutral-700 p-4">
                 <div className="max-w-4xl mx-auto">
                   {selectedWord ? (
                     <div>
-                      <span className="text-lg font-semibold text-zinc-100">{selectedWord.word}</span>
-                      {selectedWord.pronunciation && <span className="text-zinc-400 ml-2">{selectedWord.pronunciation}</span>}
-                      {selectedWord.part_of_speech && <span className="text-xs px-2 py-0.5 bg-zinc-700 rounded ml-2 text-zinc-300">{selectedWord.part_of_speech}</span>}
-                      <p className="text-zinc-300 mt-1">{selectedWord.translation}</p>
+                      <span className="text-lg font-semibold text-neutral-100">{selectedWord.word}</span>
+                      {selectedWord.pronunciation && <span className="text-neutral-400 ml-2">{selectedWord.pronunciation}</span>}
+                      {selectedWord.part_of_speech && <span className="text-xs px-2 py-0.5 bg-neutral-700 rounded ml-2 text-neutral-300">{selectedWord.part_of_speech}</span>}
+                      <p className="text-neutral-300 mt-1">{selectedWord.translation}</p>
                     </div>
                   ) : (
-                    <p className="text-zinc-500 text-center">
+                    <p className="text-neutral-500 text-center">
                       {currentPageVocab.length > 0 ? "👆 Click a vocabulary word to see its meaning" : "No vocabulary words on this page"}
                     </p>
                   )}
@@ -287,18 +287,18 @@ function ArticlePage() {
               </div>
 
               {/* Page Navigation */}
-              <div className="bg-zinc-800/50 border-t border-zinc-700 p-4">
+              <div className="bg-stone-800/50 border-t border-neutral-700 p-4">
                 <div className="max-w-4xl mx-auto flex items-center justify-between">
-                  <button onClick={goToPrevPage} disabled={currentPage === 1} className={clsx("flex items-center gap-2 px-4 py-2 rounded-lg", currentPage === 1 ? "text-zinc-600" : "text-zinc-300 hover:bg-zinc-700")}>
+                  <button onClick={goToPrevPage} disabled={currentPage === 1} className={clsx("flex items-center gap-2 px-4 py-2 rounded-lg", currentPage === 1 ? "text-neutral-600" : "text-neutral-300 hover:bg-neutral-700")}>
                     <ChevronLeft className="w-5 h-5" />
                     <span className="hidden sm:inline">Previous</span>
                   </button>
                   <div className="flex items-center gap-1">
                     {Array.from({ length: contentPages }, (_, i) => i + 1).map((i) => (
-                      <button key={i} onClick={() => { setCurrentPage(i); setSelectedWordIndex(-1); }} className={clsx("w-2 h-2 rounded-full", i === currentPage ? "bg-amber-400 w-6" : "bg-zinc-600 hover:bg-zinc-500")} />
+                      <button key={i} onClick={() => { setCurrentPage(i); setSelectedWordIndex(-1); }} className={clsx("w-2 h-2 rounded-full", i === currentPage ? "bg-amber-400 w-6" : "bg-neutral-600 hover:bg-neutral-500")} />
                     ))}
                   </div>
-                  <button onClick={goToNextPage} disabled={currentPage >= contentPages} className={clsx("flex items-center gap-2 px-4 py-2 rounded-lg", currentPage >= contentPages ? "text-zinc-600" : "text-zinc-300 hover:bg-zinc-700")}>
+                  <button onClick={goToNextPage} disabled={currentPage >= contentPages} className={clsx("flex items-center gap-2 px-4 py-2 rounded-lg", currentPage >= contentPages ? "text-neutral-600" : "text-neutral-300 hover:bg-neutral-700")}>
                     <span className="hidden sm:inline">Next</span>
                     <ChevronRight className="w-5 h-5" />
                   </button>
@@ -310,9 +310,9 @@ function ArticlePage() {
 
         {/* Right Sidebar - Vocabulary */}
         {currentPage > 0 && (
-          <div className="hidden lg:flex flex-col w-48 xl:w-56 bg-zinc-800/20 p-4 border-l border-zinc-700">
+          <div className="hidden lg:flex flex-col w-48 xl:w-56 bg-stone-800/20 p-4 border-l border-neutral-700">
             <div className="sticky top-24">
-              <h3 className="text-sm font-semibold text-zinc-400 mb-3 flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-neutral-400 mb-3 flex items-center gap-2">
                 <BookOpen className="w-4 h-4" />
                 Vocabulary
               </h3>
@@ -326,14 +326,14 @@ function ArticlePage() {
                         "w-full text-left px-3 py-2 rounded-lg text-sm transition-all capitalize",
                         selectedWordIndex === index
                           ? "bg-amber-400 text-amber-900 font-medium"
-                          : "bg-zinc-700/50 text-zinc-300 hover:bg-zinc-700"
+                          : "bg-neutral-700/50 text-neutral-300 hover:bg-neutral-700"
                       )}
                     >
                       {v.word}
                     </button>
                   ))
                 ) : (
-                  <p className="text-zinc-500 text-sm text-center py-4">
+                  <p className="text-neutral-500 text-sm text-center py-4">
                     No vocabulary on this page
                   </p>
                 )}
@@ -345,13 +345,13 @@ function ArticlePage() {
 
       {/* Mobile Navigation */}
       {currentPage > 0 && (
-        <div className="md:hidden bg-zinc-800 border-t border-zinc-700 p-3">
+        <div className="md:hidden bg-zinc-800 border-t border-neutral-700 p-3">
           <div className="flex justify-center items-center gap-8">
-            <button onClick={goToPrevPage} disabled={currentPage === 1} className={clsx("p-2 rounded-lg", currentPage === 1 ? "text-zinc-600" : "text-zinc-300")}>
+            <button onClick={goToPrevPage} disabled={currentPage === 1} className={clsx("p-2 rounded-lg", currentPage === 1 ? "text-neutral-600" : "text-neutral-300")}>
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <span className="text-zinc-300 font-medium">{currentPage} / {contentPages}</span>
-            <button onClick={goToNextPage} disabled={currentPage >= contentPages} className={clsx("p-2 rounded-lg", currentPage >= contentPages ? "text-zinc-600" : "text-zinc-300")}>
+            <span className="text-neutral-300 font-medium">{currentPage} / {contentPages}</span>
+            <button onClick={goToNextPage} disabled={currentPage >= contentPages} className={clsx("p-2 rounded-lg", currentPage >= contentPages ? "text-neutral-600" : "text-neutral-300")}>
               <ChevronRight className="w-6 h-6" />
             </button>
           </div>
@@ -360,10 +360,10 @@ function ArticlePage() {
 
       {/* Mobile Vocabulary Buttons */}
       {currentPage > 0 && currentPageVocab.length > 0 && (
-        <div className="md:hidden bg-zinc-800/50 border-t border-zinc-700 p-3">
+        <div className="md:hidden bg-stone-800/50 border-t border-neutral-700 p-3">
           <div className="flex flex-wrap gap-2 justify-center">
             {currentPageVocab.map((v, index) => (
-              <button key={v.id} onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)} className={clsx("px-3 py-1.5 rounded-full text-sm", selectedWordIndex === index ? "bg-amber-400 text-amber-900 font-medium" : "bg-zinc-700 text-zinc-300")}>
+              <button key={v.id} onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)} className={clsx("px-3 py-1.5 rounded-full text-sm", selectedWordIndex === index ? "bg-amber-400 text-amber-900 font-medium" : "bg-neutral-700 text-neutral-300")}>
                 {v.word}
               </button>
             ))}

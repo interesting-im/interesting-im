@@ -1,0 +1,4 @@
+{
+  "outputDirectory": ".output/public",
+  "framework": "vite"
+}

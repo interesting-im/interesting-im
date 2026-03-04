@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Link } from "@tanstack/react-router"
 import { useEffect, useState, useMemo } from "react"
 import { supabaseConfig } from "~/lib/supabase"
-import { ChevronLeft, ChevronRight, BookOpen, Settings, Play, Pause, SkipForward } from "lucide-react"
+import { ChevronLeft, ChevronRight, BookOpen, Play, Pause, SkipForward } from "lucide-react"
 import clsx from "clsx"
 
 interface Article {
@@ -157,10 +157,10 @@ function ArticlePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-amber-100/50 dark:bg-zinc-900 flex items-center justify-center">
+      <div className="min-h-screen bg-amber-100/50 dark:bg-zinc-800/50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4 animate-pulse">📖</div>
-          <p className="text-amber-700 dark:text-amber-300">Loading story...</p>
+          <p className="text-stone-600 dark:text-stone-400">Loading story...</p>
         </div>
       </div>
     )
@@ -168,11 +168,11 @@ function ArticlePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-amber-100/50 dark:bg-zinc-900 flex items-center justify-center">
+      <div className="min-h-screen bg-amber-100/50 dark:bg-zinc-800/50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">❌</div>
           <p className="text-red-600 dark:text-red-400">{error}</p>
-          <Link to="/reading" className="text-amber-600 dark:text-amber-400 hover:underline mt-4 block">
+          <Link to="/reading" className="text-stone-600 dark:text-stone-400 hover:underline mt-4 block">
             ← Back to Bookshelf
           </Link>
         </div>
@@ -182,11 +182,11 @@ function ArticlePage() {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-amber-100/50 dark:bg-zinc-900 flex items-center justify-center">
+      <div className="min-h-screen bg-amber-100/50 dark:bg-zinc-800/50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">📚</div>
-          <p className="text-amber-700 dark:text-amber-300">Story not found</p>
-          <Link to="/reading" className="text-amber-600 dark:text-amber-400 hover:underline mt-4 block">
+          <p className="text-stone-600 dark:text-stone-400">Story not found</p>
+          <Link to="/reading" className="text-stone-600 dark:text-stone-400 hover:underline mt-4 block">
             ← Back to Bookshelf
           </Link>
         </div>
@@ -197,383 +197,304 @@ function ArticlePage() {
   const selectedWord = selectedWordIndex >= 0 ? currentPageVocab[selectedWordIndex] : null
   const contentPages = pages.length - 1 // Excluding cover
 
+  // Left sidebar classes based on page
+  const leftSidebarClasses = clsx(
+    currentPage === 0
+      ? "lg:flex lg:bg-amber-100/10 lg:dark:bg-zinc-800/10"
+      : "md:flex bg-amber-100/20 dark:bg-zinc-800/20",
+    "hidden md:basis-1/8"
+  )
+
+  const rightSidebarClasses = clsx(
+    currentPage === 0
+      ? "bg-amber-100/10 dark:bg-zinc-800/10"
+      : "bg-amber-100/30 dark:bg-zinc-800/30",
+    "hidden lg:flex lg:basis-1/3 xl:basis-1/4 2xl:basis-1/6 justify-center items-center"
+  )
+
   return (
-    <div className="min-h-screen bg-amber-100/50 dark:bg-zinc-900 flex flex-col">
-      {/* Header */}
-      <header className="bg-amber-200/50 dark:bg-zinc-800/50 border-b border-amber-300/50 dark:border-zinc-700 sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <Link 
-              to="/reading" 
-              className="flex items-center gap-2 text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-200 transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-              <span className="text-sm font-medium">Bookshelf</span>
-            </Link>
-            
-            <div className="flex items-center gap-3 text-sm">
-              {currentPage > 0 && (
-                <>
-                  <span className="text-amber-600 dark:text-amber-400 bg-amber-300/50 dark:bg-zinc-700 px-2 py-0.5 rounded font-medium">
-                    {currentPage} / {contentPages}
-                  </span>
-                  <span className="text-amber-500 dark:text-zinc-400 hidden sm:block">
-                    {currentPageVocab.length} words
-                  </span>
-                </>
-              )}
+    <div className="ml-4 mr-4 flex justify-center min-h-screen">
+      <div className="basis lg:basis-2/3 xl:basis-3/4 2xl:basis-5/6 flex flex-col">
+        {/* Title Section */}
+        <div id="title" className="flex w-full">
+          <div className={leftSidebarClasses}></div>
+          <div className="basis-full md:basis-7/8 lg:pt-12 flex justify-center items-center bg-amber-100/50 dark:bg-zinc-800/50">
+            <div>
+              <h1 
+                className="mt-4 text-center text-2xl md:text-4xl lg:text-5xl text-stone-700 dark:text-stone-300"
+                style={{ fontFamily: "Georgia, serif" }}
+              >
+                {article.title}
+              </h1>
             </div>
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <div className="flex-1 flex max-w-6xl mx-auto w-full">
-        {/* Left Sidebar - Auto-play controls (desktop) */}
-        <div className="hidden lg:flex flex-col w-32 xl:w-40 p-4 border-r border-amber-300/50 dark:border-zinc-700/50">
-          <div className="sticky top-24 space-y-4">
-            {/* Auto-play settings */}
-            <div className="bg-amber-200/50 dark:bg-zinc-800/50 rounded-lg p-3">
-              <h3 className="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-2 flex items-center gap-1">
-                <Settings className="w-3 h-3" />
-                AUTO
-              </h3>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300 cursor-pointer">
+        {/* Player Section (for future audio) */}
+        <div id="player" className="flex w-full">
+          <div className={leftSidebarClasses}></div>
+          <div className="basis-full md:basis-7/8 flex justify-center items-center bg-amber-100/50 dark:bg-zinc-800/50">
+            <div className="basis-full md:mt-4">
+              {/* Audio player placeholder - can be integrated later */}
+            </div>
+          </div>
+        </div>
+
+        {/* Page Content */}
+        <div id="page" className="flex w-full">
+          {/* Left Sidebar - Navigation & Auto settings */}
+          <div className={leftSidebarClasses}>
+            {currentPage === 0 ? (
+              // Cover page: show auto settings
+              <div className="flex flex-col items-center pt-8">
+                <h3 className="text-sm font-semibold text-stone-600 dark:text-stone-400 mb-2">AUTO</h3>
+                <label className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400 cursor-pointer mb-2">
                   <input 
                     type="checkbox" 
                     checked={autoPlay}
                     onChange={(e) => setAutoPlay(e.target.checked)}
-                    className="rounded text-amber-600"
+                    className="rounded text-stone-600"
                   />
                   <Play className="w-3 h-3" />
                   Read
                 </label>
-                <label className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400 cursor-pointer">
                   <input 
                     type="checkbox" 
                     checked={autoNext}
                     onChange={(e) => setAutoNext(e.target.checked)}
-                    className="rounded text-amber-600"
+                    className="rounded text-stone-600"
                   />
                   <SkipForward className="w-3 h-3" />
                   Next
                 </label>
               </div>
-            </div>
-
-            {/* Navigation */}
-            {currentPage > 0 && (
-              <div className="space-y-2">
+            ) : (
+              // Content pages: show navigation
+              <div className="mt-2 flex flex-col items-center">
                 <button
                   onClick={goToPrevPage}
                   disabled={currentPage === 1}
                   className={clsx(
-                    "w-full py-2 rounded-lg text-sm font-medium transition-all",
-                    currentPage === 1
-                      ? "bg-stone-300 dark:bg-zinc-700 text-stone-500 cursor-not-allowed"
-                      : "bg-stone-600 dark:bg-amber-700 text-white hover:bg-stone-700 dark:hover:bg-amber-600"
+                    "h-8 w-8 px-1 py-1 mb-2 justify-center items-center bg-stone-600 text-sm text-white rounded",
+                    "hover:bg-stone-800 dark:hover:bg-amber-600",
+                    "lg:w-10 lg:px-2",
+                    currentPage === 1 && "opacity-50 cursor-not-allowed"
                   )}
                 >
-                  ← Prev
+                  ↑
                 </button>
+                <div className="w-6 lg:w-16 ml-1 lg:-ml-3 my-4 flex justify-center">
+                  <div className="flex">
+                    <p className="text-stone-700 dark:text-stone-300">{currentPage}</p>
+                    <p className="text-stone-500 mx-1">/</p>
+                    <p className="text-stone-500">{contentPages}</p>
+                  </div>
+                </div>
                 <button
                   onClick={goToNextPage}
                   disabled={currentPage >= contentPages}
                   className={clsx(
-                    "w-full py-2 rounded-lg text-sm font-medium transition-all",
-                    currentPage >= contentPages
-                      ? "bg-stone-300 dark:bg-zinc-700 text-stone-500 cursor-not-allowed"
-                      : "bg-stone-600 dark:bg-amber-700 text-white hover:bg-stone-700 dark:hover:bg-amber-600"
+                    "h-8 w-8 px-1 py-1 mt-2 justify-center items-center bg-stone-600 text-sm text-white rounded",
+                    "hover:bg-stone-800 dark:hover:bg-amber-600",
+                    "lg:w-10 lg:px-2",
+                    currentPage >= contentPages && "opacity-50 cursor-not-allowed"
                   )}
                 >
-                  Next →
+                  ↓
                 </button>
               </div>
             )}
           </div>
-        </div>
 
-        {/* Content Area */}
-        <div className="flex-1 flex flex-col">
-          {/* Cover Page */}
-          {currentPage === 0 ? (
-            <div 
-              className="flex-1 flex items-center justify-center p-8 cursor-pointer bg-amber-100/30 dark:bg-zinc-800/30"
-              onClick={handleCoverClick}
-            >
-              <div className="text-center">
-                {/* Book Cover */}
-                <div className="mb-8">
-                  {article.image_url ? (
-                    <img 
-                      src={article.image_url} 
-                      alt={article.title}
-                      className="w-48 h-72 object-cover rounded-lg shadow-2xl mx-auto"
-                    />
-                  ) : (
-                    <div className="w-48 h-72 bg-gradient-to-br from-amber-600 to-amber-800 rounded-lg shadow-2xl mx-auto flex items-center justify-center">
-                      <BookOpen className="w-16 h-16 text-amber-200" />
-                    </div>
-                  )}
-                </div>
-                
-                {/* Title */}
-                <h1 
-                  className="text-3xl md:text-4xl lg:text-5xl font-bold text-amber-900 dark:text-amber-100 mb-4"
-                  style={{ fontFamily: "Georgia, serif" }}
-                >
-                  {article.title}
-                </h1>
-                
-                {/* Meta */}
-                <div className="flex items-center justify-center gap-3 text-amber-700 dark:text-amber-400 text-sm mb-8">
-                  <span>{article.author || "Unknown"}</span>
-                  <span>•</span>
-                  <span>{article.reading_time_minutes || 5} min</span>
-                  <span>•</span>
-                  <span className="px-2 py-0.5 bg-amber-300 dark:bg-zinc-700 rounded-full text-xs">
-                    {article.category || "General"}
-                  </span>
-                </div>
-
-                {/* Start reading hint */}
-                <p className="text-amber-500 dark:text-zinc-500 text-lg animate-pulse">
-                  Click anywhere to start reading →
-                </p>
+          {/* Main Content */}
+          <div className="basis-full md:basis-7/8 flex">
+            {currentPage === 0 ? (
+              // Cover page with image
+              <div 
+                className="flex p-4 justify-center items-center min-w-full bg-amber-100/50 dark:bg-zinc-800/50 cursor-pointer"
+                onClick={handleCoverClick}
+              >
+                {article.image_url ? (
+                  <img
+                    src={article.image_url}
+                    alt={article.title}
+                    height={800}
+                    width={400}
+                    onClick={handleCoverClick}
+                    className="max-h-[500px] object-contain"
+                  />
+                ) : (
+                  <div className="w-48 h-72 bg-gradient-to-br from-amber-600 to-amber-800 rounded-lg shadow-2xl flex items-center justify-center">
+                    <BookOpen className="w-16 h-16 text-amber-200" />
+                  </div>
+                )}
               </div>
-            </div>
-          ) : (
-            /* Content Pages */
-            <>
-              {/* Reading content */}
-              <div className="flex-1 p-6 md:p-8 lg:p-12">
-                <div 
-                  className="max-w-2xl mx-auto text-xl md:text-2xl leading-10 md:leading-12 text-amber-800 dark:text-zinc-200 indent-8"
-                  style={{ fontFamily: "Georgia, serif" }}
-                >
-                  {selectedWord ? (
-                    <p>{highlightText(pages[currentPage], selectedWord.word)}</p>
-                  ) : (
-                    <p>{pages[currentPage]}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Definition bar */}
-              <div className="bg-amber-200/50 dark:bg-zinc-800 border-t border-amber-300 dark:border-zinc-700">
-                <div className="max-w-2xl mx-auto px-6 py-4 min-h-[60px] flex items-center">
-                  {selectedWord ? (
-                    <div className="w-full">
-                      <div className="flex items-center gap-3 mb-1">
-                        <span className="text-lg font-semibold text-amber-900 dark:text-amber-100">
-                          {selectedWord.word}
-                        </span>
-                        {selectedWord.pronunciation && (
-                          <span className="text-sm text-amber-600 dark:text-amber-400">
-                            {selectedWord.pronunciation}
-                          </span>
-                        )}
-                        {selectedWord.part_of_speech && (
-                          <span className="text-xs px-2 py-0.5 bg-amber-300 dark:bg-zinc-700 rounded text-amber-700 dark:text-amber-300">
-                            {selectedWord.part_of_speech}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-amber-800 dark:text-amber-200 font-medium">
-                        {selectedWord.translation}
-                      </p>
-                    </div>
-                  ) : (
-                    <p className="text-amber-500 dark:text-zinc-500 text-sm text-center w-full">
-                      {currentPageVocab.length > 0 
-                        ? "👆 Click a vocabulary word to see its meaning" 
-                        : "No vocabulary words on this page"}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Mobile vocabulary buttons */}
-              {currentPageVocab.length > 0 && (
-                <div className="lg:hidden bg-amber-100/50 dark:bg-zinc-850 border-t border-amber-300/50 dark:border-zinc-700/50 p-3">
-                  <div className="flex flex-wrap gap-2 justify-center">
+            ) : (
+              // Content page with highlight
+              <div className="flex flex-col min-w-full pb-4 md:px-4 bg-amber-100/50 dark:bg-zinc-800/50">
+                <div className="flex">
+                  {/* Vocabulary buttons */}
+                  <div className="hidden md:flex flex-col md:basis-1/12 md:-ml-3 items-start">
                     {currentPageVocab.map((v, index) => (
                       <button
                         key={v.id}
                         onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
                         className={clsx(
-                          "px-3 py-1.5 rounded-full text-sm transition-all",
+                          "min-w-10 m-1 p-2 bg-stone-400 dark:bg-neutral-700 text-center text-lg capitalize rounded",
+                          "hover:bg-stone-500/75 dark:hover:bg-amber-800",
+                          "md:min-w-20",
                           selectedWordIndex === index
-                            ? "bg-amber-400 dark:bg-amber-600 text-amber-900 dark:text-amber-100 font-medium"
-                            : "bg-amber-200 dark:bg-zinc-800 text-amber-700 dark:text-amber-300"
+                            ? "text-stone-700 dark:text-amber-200 font-semibold"
+                            : "text-stone-700 dark:text-stone-300/67"
                         )}
                       >
                         {v.word}
                       </button>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {/* Navigation bar */}
-              <div className="bg-amber-200/50 dark:bg-zinc-800/50 border-t border-amber-300 dark:border-zinc-700">
-                <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-                  <button
-                    onClick={goToPrevPage}
-                    disabled={currentPage === 1}
-                    className={clsx(
-                      "flex items-center gap-2 px-4 py-2 rounded-lg transition-all",
-                      currentPage === 1
-                        ? "text-amber-400 dark:text-zinc-600 cursor-not-allowed"
-                        : "text-amber-700 dark:text-amber-300 hover:bg-amber-300 dark:hover:bg-zinc-700"
-                    )}
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                    <span className="text-sm font-medium hidden sm:block">Previous</span>
-                  </button>
-
-                  {/* Page dots */}
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: contentPages }, (_, i) => i + 1).map((i) => (
-                      <button
-                        key={i}
-                        onClick={() => {
-                          setCurrentPage(i)
-                          setSelectedWordIndex(-1)
-                        }}
+                  
+                  <div className="hidden md:flex mr-2 border-1 border-stone-500/75 border-dashed" />
+                  
+                  {/* Text content */}
+                  <div className="basis-full md:basis-11/12 flex justify-start items-center">
+                    <div>
+                      <div 
                         className={clsx(
-                          "w-2 h-2 rounded-full transition-all",
-                          i === currentPage
-                            ? "bg-amber-500 dark:bg-amber-400 w-6"
-                            : "bg-amber-300 dark:bg-zinc-600 hover:bg-amber-400 dark:hover:bg-zinc-500"
+                          "mx-8 text leading-8 indent-8 text-stone-600 dark:text-stone-400 selection:text-amber-700",
+                          "md:min-h-[320px] md:text-lg md:leading-10",
+                          "lg:min-h-[480px] lg:text-2xl lg:leading-12"
                         )}
-                      />
+                        style={{ fontFamily: "Georgia, serif" }}
+                      >
+                        {selectedWord ? (
+                          highlightText(pages[currentPage], selectedWord.word)
+                        ) : (
+                          pages[currentPage]
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Definition bar */}
+                <div id="dict" className="flex">
+                  {currentPageVocab.length === 0 || selectedWordIndex === -1 ? (
+                    <div className="w-full p-4 bg-amber-100/50 dark:bg-zinc-800/50 text-center text-xl text-stone-600 dark:text-stone-400">
+                      &nbsp;
+                    </div>
+                  ) : (
+                    <div className="w-full p-4 bg-stone-400 dark:bg-neutral-700 text-center text-xl text-stone-700 dark:text-amber-200 capitalize">
+                      {selectedWord?.translation}
+                    </div>
+                  )}
+                </div>
+
+                {/* Mobile vocabulary buttons */}
+                {currentPageVocab.length > 0 && (
+                  <div className="flex mt-4 justify-center items-center md:hidden">
+                    {currentPageVocab.map((v, index) => (
+                      <button
+                        key={v.id}
+                        onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
+                        className={clsx(
+                          "min-w-10 mx-1 p-2 bg-stone-400 dark:bg-neutral-700 text-center text-lg capitalize rounded",
+                          "hover:bg-stone-500/75 dark:hover:bg-amber-800",
+                          "md:min-w-20",
+                          selectedWordIndex === index
+                            ? "text-stone-700 dark:text-amber-200 font-semibold"
+                            : "text-stone-700 dark:text-stone-300/67"
+                        )}
+                      >
+                        {v.word}
+                      </button>
                     ))}
                   </div>
-
-                  <button
-                    onClick={goToNextPage}
-                    disabled={currentPage >= contentPages}
-                    className={clsx(
-                      "flex items-center gap-2 px-4 py-2 rounded-lg transition-all",
-                      currentPage >= contentPages
-                        ? "text-amber-400 dark:text-zinc-600 cursor-not-allowed"
-                        : "text-amber-700 dark:text-amber-300 hover:bg-amber-300 dark:hover:bg-zinc-700"
-                    )}
-                  >
-                    <span className="text-sm font-medium hidden sm:block">Next</span>
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
+                )}
               </div>
-            </>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Right Sidebar - Vocabulary (desktop) */}
-        <div className="hidden lg:flex flex-col w-48 xl:w-56 p-4 border-l border-amber-300/50 dark:border-zinc-700/50">
-          <div className="sticky top-24">
-            <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-3 flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
+        {/* Mobile Navigation */}
+        {currentPage > 0 && (
+          <div id="navi" className="flex justify-center items-center md:hidden my-4">
+            <button 
+              className="mr-8 cursor-pointer" 
+              onClick={goToPrevPage}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft color={currentPage === 1 ? "#9ca3af" : "black"} size={24} strokeWidth={1.5} />
+            </button>
+            <div className="w-6 lg:w-16 ml-1 lg:-ml-3 my-4 flex justify-center">
+              <div className="flex">
+                <p className="text-stone-700 dark:text-stone-300">{currentPage}</p>
+                <p className="text-stone-500 mx-1">/</p>
+                <p className="text-stone-500">{contentPages}</p>
+              </div>
+            </div>
+            <button 
+              className="ml-8 cursor-pointer" 
+              onClick={goToNextPage}
+              disabled={currentPage >= contentPages}
+            >
+              <ChevronRight color={currentPage >= contentPages ? "#9ca3af" : "black"} size={24} strokeWidth={1.5} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Right Sidebar - Vocabulary */}
+      <div className={rightSidebarClasses}>
+        {currentPage === 0 ? (
+          // Vocabulary list on cover page
+          <div className="flex flex-col w-full h-full justify-start items-center text-stone-600 dark:text-stone-300/50">
+            <h1 className="md:pt-16 md:text-4xl lg:text-5xl" style={{ fontFamily: "Barlow Condensed, sans-serif" }}>
               Vocabulary
-            </h3>
-            <div className="space-y-2">
-              {currentPage > 0 && currentPageVocab.length > 0 ? (
-                currentPageVocab.map((v, index) => (
+            </h1>
+            <div className="flex flex-col h-full mt-8 justify-center items-start">
+              {vocabulary.map((v, index) => (
+                <div key={index} className="flex">
+                  <input type="checkbox" className="mr-2" />
+                  <p className="ml-2 leading-8 capitalize hover:text-amber-800 dark:hover:text-amber-200">
+                    {v.word}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          // Gallery or empty on content pages
+          <div className="flex items-center justify-center w-full h-full text-stone-500 dark:text-stone-400">
+            {currentPageVocab.length > 0 ? (
+              <div className="space-y-2 w-full px-4">
+                <h3 className="text-sm font-semibold text-stone-600 dark:text-stone-400 mb-3 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4" />
+                  Vocabulary
+                </h3>
+                {currentPageVocab.map((v, index) => (
                   <button
                     key={v.id}
                     onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
                     className={clsx(
                       "w-full text-left px-3 py-2 rounded-lg text-sm transition-all capitalize",
                       selectedWordIndex === index
-                        ? "bg-amber-300 dark:bg-amber-700 text-amber-900 dark:text-amber-100 font-medium shadow-sm"
-                        : "bg-amber-200/50 dark:bg-zinc-800 text-amber-700 dark:text-amber-300 hover:bg-amber-300 dark:hover:bg-zinc-700"
+                        ? "bg-stone-500 dark:bg-amber-800 text-white dark:text-amber-100 font-medium"
+                        : "bg-stone-400 dark:bg-neutral-700 text-stone-700 dark:text-stone-300 hover:bg-stone-500 dark:hover:bg-amber-800"
                     )}
                   >
                     {v.word}
                   </button>
-                ))
-              ) : currentPage === 0 ? (
-                <p className="text-amber-500/50 dark:text-zinc-500 text-sm text-center py-4">
-                  Vocabulary list on next page
-                </p>
-              ) : (
-                <p className="text-amber-500/50 dark:text-zinc-500 text-sm text-center py-4">
-                  No vocabulary on this page
-                </p>
-              )}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-stone-500 dark:text-stone-400 text-sm">
+                No vocabulary on this page
+              </p>
+            )}
           </div>
-        </div>
+        )}
       </div>
-
-      {/* Mobile Navigation */}
-      {currentPage > 0 && (
-        <div className="lg:hidden bg-amber-200/50 dark:bg-zinc-800/50 border-t border-amber-300 dark:border-zinc-700 p-3">
-          <div className="flex justify-center items-center gap-8">
-            <button
-              onClick={goToPrevPage}
-              disabled={currentPage === 1}
-              className={clsx(
-                "p-2 rounded-lg",
-                currentPage === 1
-                  ? "text-stone-400"
-                  : "text-amber-700 dark:text-amber-300 hover:bg-amber-300 dark:hover:bg-zinc-700"
-              )}
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-            <span className="text-amber-700 dark:text-amber-300 font-medium">
-              {currentPage} / {contentPages}
-            </span>
-            <button
-              onClick={goToNextPage}
-              disabled={currentPage >= contentPages}
-              className={clsx(
-                "p-2 rounded-lg",
-                currentPage >= contentPages
-                  ? "text-stone-400"
-                  : "text-amber-700 dark:text-amber-300 hover:bg-amber-300 dark:hover:bg-zinc-700"
-              )}
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Vocabulary Panel - Full list at bottom */}
-      {vocabulary.length > 0 && currentPage > 0 && (
-        <div className="bg-amber-100/50 dark:bg-zinc-800/50 border-t border-amber-300 dark:border-zinc-700">
-          <div className="max-w-4xl mx-auto px-6 py-8">
-            <h2 className="text-lg font-semibold text-amber-800 dark:text-amber-200 mb-4 flex items-center gap-2">
-              📚 All Vocabulary ({vocabulary.length} words)
-            </h2>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {vocabulary.map((v) => (
-                <div 
-                  key={v.id} 
-                  className="bg-white dark:bg-zinc-800 rounded-lg p-3 border border-amber-200 dark:border-zinc-700"
-                >
-                  <div className="flex items-start justify-between mb-1">
-                    <span className="font-medium text-amber-900 dark:text-amber-100 capitalize">{v.word}</span>
-                    {v.pronunciation && (
-                      <span className="text-xs text-amber-500 dark:text-zinc-500">{v.pronunciation}</span>
-                    )}
-                  </div>
-                  <p className="text-amber-600 dark:text-amber-300 text-sm">{v.translation}</p>
-                  {v.part_of_speech && (
-                    <span className="text-xs text-amber-500 dark:text-zinc-500 mt-1 block">
-                      {v.part_of_speech}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

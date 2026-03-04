@@ -36,11 +36,9 @@ function ArticlePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Page state: 0 = cover, 1+ = content pages
   const [currentPage, setCurrentPage] = useState(0)
   const [selectedWordIndex, setSelectedWordIndex] = useState(-1)
   
-  // Auto-play settings
   const [autoPlay, setAutoPlay] = useState(false)
   const [autoNext, setAutoNext] = useState(false)
 
@@ -95,14 +93,12 @@ function ArticlePage() {
     fetchArticle()
   }, [articleId])
 
-  // Split content into pages
   const pages = useMemo(() => {
     if (!article?.content) return []
     const contentPages = article.content.split('\n\n').filter(p => p.trim())
     return ['', ...contentPages]
   }, [article?.content])
 
-  // Fuzzy match function
   const fuzzyMatch = (word: string, text: string): boolean => {
     const lowerWord = word.toLowerCase()
     const lowerText = text.toLowerCase()
@@ -114,14 +110,12 @@ function ArticlePage() {
     return false
   }
 
-  // Get vocabulary for current page
   const currentPageVocab = useMemo(() => {
     if (!vocabulary.length || currentPage === 0) return []
     const pageText = pages[currentPage] || ''
     return vocabulary.filter(v => fuzzyMatch(v.word, pageText))
   }, [vocabulary, pages, currentPage])
 
-  // Navigation handlers
   const goToNextPage = () => {
     if (currentPage < pages.length - 1) {
       setCurrentPage(currentPage + 1)
@@ -136,7 +130,6 @@ function ArticlePage() {
     }
   }
 
-  // Highlight word in text - fuzzy matching
   const highlightText = (text: string, wordToHighlight: string) => {
     if (!wordToHighlight) return text
     
@@ -215,7 +208,7 @@ function ArticlePage() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content with Sidebar */}
       <div className="flex-1 flex">
         {/* Left Sidebar - Navigation */}
         <div className="hidden md:flex flex-col w-20 lg:w-32 bg-zinc-800/20 p-4">
@@ -293,19 +286,6 @@ function ArticlePage() {
                 </div>
               </div>
 
-              {/* Mobile Vocab Buttons */}
-              {currentPageVocab.length > 0 && (
-                <div className="md:hidden bg-zinc-800/50 border-t border-zinc-700 p-3">
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {currentPageVocab.map((v, index) => (
-                      <button key={v.id} onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)} className={clsx("px-3 py-1.5 rounded-full text-sm", selectedWordIndex === index ? "bg-amber-400 text-amber-900 font-medium" : "bg-zinc-700 text-zinc-300")}>
-                        {v.word}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Page Navigation */}
               <div className="bg-zinc-800/50 border-t border-zinc-700 p-4">
                 <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -327,6 +307,40 @@ function ArticlePage() {
             </>
           )}
         </div>
+
+        {/* Right Sidebar - Vocabulary */}
+        {currentPage > 0 && (
+          <div className="hidden lg:flex flex-col w-48 xl:w-56 bg-zinc-800/20 p-4 border-l border-zinc-700">
+            <div className="sticky top-24">
+              <h3 className="text-sm font-semibold text-zinc-400 mb-3 flex items-center gap-2">
+                <BookOpen className="w-4 h-4" />
+                Vocabulary
+              </h3>
+              <div className="space-y-2">
+                {currentPageVocab.length > 0 ? (
+                  currentPageVocab.map((v, index) => (
+                    <button
+                      key={v.id}
+                      onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)}
+                      className={clsx(
+                        "w-full text-left px-3 py-2 rounded-lg text-sm transition-all capitalize",
+                        selectedWordIndex === index
+                          ? "bg-amber-400 text-amber-900 font-medium"
+                          : "bg-zinc-700/50 text-zinc-300 hover:bg-zinc-700"
+                      )}
+                    >
+                      {v.word}
+                    </button>
+                  ))
+                ) : (
+                  <p className="text-zinc-500 text-sm text-center py-4">
+                    No vocabulary on this page
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mobile Navigation */}
@@ -344,23 +358,15 @@ function ArticlePage() {
         </div>
       )}
 
-      {/* Vocabulary Panel */}
-      {vocabulary.length > 0 && currentPage > 0 && (
-        <div className="bg-zinc-800/30 border-t border-zinc-700 p-6">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-lg font-semibold text-zinc-200 mb-4">📚 All Vocabulary ({vocabulary.length} words)</h2>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {vocabulary.map((v) => (
-                <div key={v.id} className="bg-zinc-800 rounded-lg p-3 border border-zinc-700">
-                  <div className="flex items-start justify-between">
-                    <span className="font-medium text-zinc-100 capitalize">{v.word}</span>
-                    {v.pronunciation && <span className="text-xs text-zinc-500">{v.pronunciation}</span>}
-                  </div>
-                  <p className="text-zinc-400 text-sm mt-1">{v.translation}</p>
-                  {v.part_of_speech && <span className="text-xs text-zinc-500 mt-1 block">{v.part_of_speech}</span>}
-                </div>
-              ))}
-            </div>
+      {/* Mobile Vocabulary Buttons */}
+      {currentPage > 0 && currentPageVocab.length > 0 && (
+        <div className="md:hidden bg-zinc-800/50 border-t border-zinc-700 p-3">
+          <div className="flex flex-wrap gap-2 justify-center">
+            {currentPageVocab.map((v, index) => (
+              <button key={v.id} onClick={() => setSelectedWordIndex(selectedWordIndex === index ? -1 : index)} className={clsx("px-3 py-1.5 rounded-full text-sm", selectedWordIndex === index ? "bg-amber-400 text-amber-900 font-medium" : "bg-zinc-700 text-zinc-300")}>
+                {v.word}
+              </button>
+            ))}
           </div>
         </div>
       )}
